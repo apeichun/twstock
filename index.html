@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>台股智慧分析 App - v9.1 (View Enhanced)</title>
+<title>台股智慧分析 App - v9.2 (Highlight Signals)</title>
 <script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
 <style>
     /* Reset & Base */
@@ -111,8 +111,9 @@
     .card-title { font-size: 11px; color: #9aa0b0; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
     .card-value { font-size: 15px; font-weight: bold; color: #e0e0e0; white-space: nowrap; }
     
-    .border-bull { border-left-color: #ef5350 !important; }
-    .border-bear { border-left-color: #26a69a !important; }
+    /* Updated Signal Colors */
+    .border-bull { border-left-color: #e91e63 !important; } /* Pink */
+    .border-bear { border-left-color: #ffeb3b !important; } /* Yellow */
     
     .recommendation-badge {
         padding: 10px 20px;
@@ -126,8 +127,9 @@
         white-space: nowrap;
         flex-shrink: 0;
     }
-    .rec-buy { background: linear-gradient(135deg, #ef5350 0%, #b71c1c 100%); }
-    .rec-sell { background: linear-gradient(135deg, #26a69a 0%, #00695c 100%); }
+    /* Updated Badge Gradients */
+    .rec-buy { background: linear-gradient(135deg, #e91e63 0%, #ad1457 100%); }
+    .rec-sell { background: linear-gradient(135deg, #fdd835 0%, #fbc02d 100%); color: #000 !important; }
     .rec-hold { background: linear-gradient(135deg, #787b86 0%, #4a4a4a 100%); }
 
     /* --- 3. Analysis Report --- */
@@ -147,8 +149,10 @@
     .report-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .report-item { font-size: 13px; color: #b2b5be; line-height: 1.6; background: #1e222d; padding: 12px; border-radius: 8px; border: 1px solid #2a2e39; word-break: break-word; }
     .report-item strong { color: #e0e0e0; display: block; margin-bottom: 6px; font-size: 12px; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px; }
-    .highlight-bull { color: #ef5350; font-weight: bold; }
-    .highlight-bear { color: #26a69a; font-weight: bold; }
+    
+    /* Highlight Colors Text */
+    .highlight-bull { color: #e91e63; font-weight: bold; }
+    .highlight-bear { color: #ffeb3b; font-weight: bold; }
     .highlight-neutral { color: #d1d4dc; font-weight: bold; }
     .report-item-full { grid-column: 1 / -1; }
     
@@ -159,14 +163,14 @@
     .action-title { font-size: 13px; font-weight: bold; color: #fff; margin-bottom: 8px; }
     .action-content { font-size: 13px; color: #d1d4dc; line-height: 1.5; }
     
-    /* Price Tags */
+    /* Updated Price Tags */
     .p-tag-buy { 
-        background: #ef5350; color: #fff; padding: 2px 6px; border-radius: 4px; font-weight: bold; 
-        font-family: 'Monaco', monospace; box-shadow: 0 2px 4px rgba(239, 83, 80, 0.3);
+        background: #e91e63; color: #fff; padding: 2px 6px; border-radius: 4px; font-weight: bold; 
+        font-family: 'Monaco', monospace; box-shadow: 0 2px 4px rgba(233, 30, 99, 0.3);
     }
     .p-tag-sell { 
-        background: #26a69a; color: #fff; padding: 2px 6px; border-radius: 4px; font-weight: bold; 
-        font-family: 'Monaco', monospace; box-shadow: 0 2px 4px rgba(38, 166, 154, 0.3);
+        background: #ffeb3b; color: #000; padding: 2px 6px; border-radius: 4px; font-weight: bold; 
+        font-family: 'Monaco', monospace; box-shadow: 0 2px 4px rgba(255, 235, 59, 0.3);
     }
     .p-tag-neu {
         background: #ffb74d; color: #000; padding: 2px 6px; border-radius: 4px; font-weight: bold;
@@ -211,7 +215,10 @@
     .info-group { display: flex; gap: 6px; align-items: center; white-space: nowrap; }
     .info-value { font-weight: bold; color: #d1d4dc; font-family: 'Monaco', monospace; }
     
-    .c-ma { color: #FFD700; } .c-bb { color: #2962ff; } .c-up { color: #ef5350; } .c-down { color: #26a69a; }
+    /* Updated Legend Colors */
+    .c-ma { color: #FFD700; } .c-bb { color: #2962ff; } 
+    .c-up { color: #e91e63; } /* Pink */
+    .c-down { color: #ffeb3b; } /* Yellow */
     
     .indicator-legend-sub {
         position: absolute; top: 6px; left: 10px; z-index: 10;
@@ -379,7 +386,7 @@
                 signal = macd*k9 + signal*(1-k9);
                 macdLine.push({ time: data[i].time, value: macd });
                 signalLine.push({ time: data[i].time, value: signal });
-                macdHist.push({ time: data[i].time, value: macd - signal, color: (macd-signal)>=0?'#ef5350':'#26a69a' });
+                macdHist.push({ time: data[i].time, value: macd - signal, color: (macd-signal)>=0?'#e91e63':'#26a69a' }); /* Updated MACD Colors */
             }
 
             return { ma: maData, bbUp, bbLow, rsi: rsiData, macd: { line: macdLine, signal: signalLine, hist: macdHist } };
@@ -402,11 +409,12 @@
                 const prevHist = prevHistItem.value;
                 const currHist = currHistItem.value;
                 
+                // Updated Signal Colors
                 if (prevHist < 0 && currHist > 0) {
-                    markers.push({ time: time, position: 'belowBar', color: '#ef5350', shape: 'arrowUp', text: '買' });
+                    markers.push({ time: time, position: 'belowBar', color: '#e91e63', shape: 'arrowUp', text: '買' });
                     lastSignal = { type: 'BUY', time: time, price: data[i].close };
                 } else if (prevHist > 0 && currHist < 0) {
-                    markers.push({ time: time, position: 'aboveBar', color: '#26a69a', shape: 'arrowDown', text: '賣' });
+                    markers.push({ time: time, position: 'aboveBar', color: '#ffeb3b', shape: 'arrowDown', text: '賣' });
                     lastSignal = { type: 'SELL', time: time, price: data[i].close };
                 }
             }
@@ -433,7 +441,8 @@
         
         function initCharts() {
             mainChart = LightweightCharts.createChart(dom.main, commonOptions);
-            candleSeries = mainChart.addCandlestickSeries({ upColor: '#ef5350', downColor: '#26a69a', borderVisible: false, wickUpColor: '#ef5350', wickDownColor: '#26a69a' });
+            // Updated Candle Colors
+            candleSeries = mainChart.addCandlestickSeries({ upColor: '#e91e63', downColor: '#26a69a', borderVisible: false, wickUpColor: '#e91e63', wickDownColor: '#26a69a' });
             maSeries = mainChart.addLineSeries({ color: '#FFD700', lineWidth: 1, crosshairMarkerVisible: false });
             upperSeries = mainChart.addLineSeries({ color: '#2962ff', lineWidth: 2, crosshairMarkerVisible: false });
             lowerSeries = mainChart.addLineSeries({ color: '#2962ff', lineWidth: 2, crosshairMarkerVisible: false });
@@ -448,7 +457,7 @@
 
             rsiChart = LightweightCharts.createChart(dom.rsi, { ...commonOptions, rightPriceScale: { scaleMargins: { top: 0.1, bottom: 0.1 } } });
             rsiSeries = rsiChart.addLineSeries({ color: '#ce93d8', lineWidth: 1 });
-            rsiSeries.createPriceLine({ price: 70, color: '#ef5350', lineStyle: 2, axisLabelVisible: false });
+            rsiSeries.createPriceLine({ price: 70, color: '#e91e63', lineStyle: 2, axisLabelVisible: false });
             rsiSeries.createPriceLine({ price: 30, color: '#26a69a', lineStyle: 2, axisLabelVisible: false });
 
             const charts = [mainChart, volChart, macdChart, rsiChart];
@@ -568,7 +577,8 @@
             const osc = maps.hist.get(time);
             const elOsc = document.getElementById('val-osc');
             elOsc.innerText = fmt(osc);
-            elOsc.style.color = osc >= 0 ? '#ef5350' : '#26a69a';
+            // Updated MACD Osc Color
+            elOsc.style.color = osc >= 0 ? '#e91e63' : '#26a69a';
             document.getElementById('val-rsi').innerText = fmt(maps.rsi.get(time));
         }
 
