@@ -3,17 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>台股智慧分析 App - v8.8 (Card Layout)</title>
+<title>台股智慧分析 App - v8.9 (Visual Enhanced)</title>
 <script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
 <style>
     /* Reset & Base */
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    /* Fix: Body background darker to contrast with charts */
     body { background: #0e1015; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #d1d4dc; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
     
-    /* --- 1. Header Toolbar (Responsive) --- */
+    /* --- 1. Header Toolbar --- */
     .toolbar {
-        padding: 8px 16px;
+        padding: 10px 24px;
         background: #1e222d;
         border-bottom: 1px solid #000;
         display: flex;
@@ -21,15 +20,15 @@
         justify-content: space-between;
         align-items: center;
         flex-shrink: 0;
-        gap: 10px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        gap: 12px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.4);
         z-index: 60;
     }
     
     .symbol-info { display: flex; flex-direction: column; min-width: 100px; }
-    .symbol-name { font-size: 16px; font-weight: bold; color: #e0e0e0; display: flex; align-items: center; gap: 6px;}
-    .symbol-tag { background: #00897b; font-size: 10px; padding: 2px 5px; border-radius: 2px; color: white; }
-    .symbol-status { font-size: 11px; color: #787b86; display: flex; align-items: center; gap: 4px; margin-top: 2px; }
+    .symbol-name { font-size: 18px; font-weight: bold; color: #e0e0e0; display: flex; align-items: center; gap: 8px;}
+    .symbol-tag { background: #00897b; font-size: 11px; padding: 2px 6px; border-radius: 4px; color: white; }
+    .symbol-status { font-size: 11px; color: #787b86; display: flex; align-items: center; gap: 6px; margin-top: 4px; }
     .dot-live { width: 8px; height: 8px; background: #00e676; border-radius: 50%; box-shadow: 0 0 5px #00e676; }
     .dot-error { width: 8px; height: 8px; background: #ff1744; border-radius: 50%; }
 
@@ -38,11 +37,11 @@
         display: flex;
         align-items: center;
         background: #2a2e39;
-        border-radius: 4px;
-        padding: 4px 8px;
+        border-radius: 6px;
+        padding: 6px 12px;
         border: 1px solid #363a45;
         flex-grow: 1; 
-        max-width: 200px;
+        max-width: 240px;
     }
     .search-input {
         background: transparent;
@@ -58,38 +57,38 @@
         background: #2962ff;
         border: none;
         color: white;
-        border-radius: 2px;
-        padding: 6px 12px;
-        font-size: 13px;
+        border-radius: 4px;
+        padding: 6px 14px;
+        font-size: 14px;
         cursor: pointer;
-        margin-left: 4px;
+        margin-left: 8px;
         font-weight: bold;
         white-space: nowrap;
     }
     .search-btn:active { transform: translateY(1px); }
 
     /* Zoom Buttons */
-    .zoom-group { display: flex; gap: 4px; }
+    .zoom-group { display: flex; gap: 6px; }
     .zoom-btn {
         background: transparent;
         border: 1px solid #363a45;
-        color: #787b86;
-        padding: 6px 10px;
-        font-size: 12px;
-        border-radius: 4px;
+        color: #9db2bd;
+        padding: 6px 12px;
+        font-size: 13px;
+        border-radius: 6px;
         cursor: pointer;
         transition: all 0.2s;
     }
-    .zoom-btn:hover { background: #2a2e39; color: #d1d4dc; }
-    .zoom-btn.active { background: #2962ff; color: white; border-color: #2962ff; }
+    .zoom-btn:hover { background: #2a2e39; color: #fff; }
+    .zoom-btn.active { background: #2962ff; color: white; border-color: #2962ff; box-shadow: 0 0 8px rgba(41, 98, 255, 0.4); }
 
     /* --- 2. Strategy Dashboard --- */
     .strategy-dashboard {
         background: #181c27;
-        padding: 10px 16px;
+        padding: 12px 24px;
         border-bottom: 1px solid #000;
         display: flex;
-        gap: 10px;
+        gap: 12px;
         overflow-x: auto; 
         flex-shrink: 0;
         align-items: center;
@@ -99,31 +98,31 @@
     
     .strategy-card {
         background: #2a2e39;
-        padding: 8px 12px;
-        border-radius: 6px;
-        min-width: 100px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        min-width: 110px;
         display: flex;
         flex-direction: column;
         justify-content: center;
         border-left: 4px solid #787b86;
         flex-shrink: 0; 
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
     }
-    .card-title { font-size: 11px; color: #9aa0b0; margin-bottom: 4px; text-transform: uppercase; }
-    .card-value { font-size: 14px; font-weight: bold; color: #e0e0e0; white-space: nowrap; }
+    .card-title { font-size: 11px; color: #9aa0b0; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .card-value { font-size: 15px; font-weight: bold; color: #e0e0e0; white-space: nowrap; }
     
     .border-bull { border-left-color: #ef5350 !important; }
     .border-bear { border-left-color: #26a69a !important; }
     
     .recommendation-badge {
-        padding: 8px 18px;
-        border-radius: 6px;
+        padding: 10px 20px;
+        border-radius: 8px;
         font-weight: bold;
         color: white;
-        font-size: 15px;
+        font-size: 16px;
         margin-left: auto;
         text-align: center;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.4);
         white-space: nowrap;
         flex-shrink: 0;
     }
@@ -134,43 +133,56 @@
     /* --- 3. Analysis Report --- */
     .analysis-report {
         background: #131722;
-        padding: 12px 16px;
+        padding: 16px 24px;
         border-bottom: 1px solid #000;
         display: none; 
         flex-direction: column;
-        gap: 10px;
+        gap: 12px;
         flex-shrink: 0;
-        max-height: 250px;
+        max-height: 280px;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
     }
-    .report-header { font-size: 14px; font-weight: bold; color: #2962ff; display: flex; align-items: center; gap: 5px; margin-bottom: 5px; }
-    .report-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .report-item { font-size: 13px; color: #b2b5be; line-height: 1.5; background: #1e222d; padding: 10px; border-radius: 6px; border: 1px solid #2a2e39; word-break: break-word; }
-    .report-item strong { color: #e0e0e0; display: block; margin-bottom: 4px; font-size: 12px; opacity: 0.9; }
+    .report-header { font-size: 15px; font-weight: bold; color: #2962ff; display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+    .report-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .report-item { font-size: 13px; color: #b2b5be; line-height: 1.6; background: #1e222d; padding: 12px; border-radius: 8px; border: 1px solid #2a2e39; word-break: break-word; }
+    .report-item strong { color: #e0e0e0; display: block; margin-bottom: 6px; font-size: 12px; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px; }
     .highlight-bull { color: #ef5350; font-weight: bold; }
     .highlight-bear { color: #26a69a; font-weight: bold; }
     .highlight-neutral { color: #d1d4dc; font-weight: bold; }
     .report-item-full { grid-column: 1 / -1; }
     
-    .action-box { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px; }
-    .action-card { background: #2a2e39; padding: 10px; border-radius: 6px; border-top: 3px solid #787b86; }
+    .action-box { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 5px; }
+    .action-card { background: #2a2e39; padding: 12px; border-radius: 8px; border-top: 4px solid #787b86; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
     .action-card.held { border-top-color: #29b6f6; }
     .action-card.empty { border-top-color: #ab47bc; }
-    .action-title { font-size: 12px; font-weight: bold; color: #fff; margin-bottom: 6px; }
-    .action-content { font-size: 13px; color: #d1d4dc; line-height: 1.4; }
-    .price-tag { background: rgba(255,255,255,0.1); padding: 1px 4px; border-radius: 3px; font-family: monospace; color: #ffeb3b; }
+    .action-title { font-size: 13px; font-weight: bold; color: #fff; margin-bottom: 8px; }
+    .action-content { font-size: 13px; color: #d1d4dc; line-height: 1.5; }
+    
+    /* NEW: High Visibility Price Tags */
+    .p-tag-buy { 
+        background: #ef5350; color: #fff; padding: 2px 6px; border-radius: 4px; font-weight: bold; 
+        font-family: 'Monaco', monospace; box-shadow: 0 2px 4px rgba(239, 83, 80, 0.3);
+    }
+    .p-tag-sell { 
+        background: #26a69a; color: #fff; padding: 2px 6px; border-radius: 4px; font-weight: bold; 
+        font-family: 'Monaco', monospace; box-shadow: 0 2px 4px rgba(38, 166, 154, 0.3);
+    }
+    .p-tag-neu {
+        background: #ffb74d; color: #000; padding: 2px 6px; border-radius: 4px; font-weight: bold;
+        font-family: 'Monaco', monospace;
+    }
 
     /* --- 4. Chart Layout (Card Style) --- */
     .container { 
         flex: 1; 
         display: flex; 
         flex-direction: column; 
-        /* Fix: Add padding so charts don't touch edges */
-        padding: 10px 16px 20px 16px; 
-        gap: 10px; 
+        /* Fix: Increase padding around charts */
+        padding: 20px 30px 50px 30px; 
+        gap: 12px; 
         overflow: hidden; 
-        background: transparent; /* Show dark body bg in gaps */
+        background: transparent; 
     }
     
     .chart-box { 
@@ -178,10 +190,9 @@
         width: 100%; 
         background: #131722; 
         overflow: hidden; 
-        /* Fix: Add border radius and border */
-        border-radius: 8px;
+        border-radius: 12px; /* Softer corners */
         border: 1px solid #2a2e39;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.3); /* Deeper shadow */
     }
     
     #main { flex: 10; } 
@@ -192,40 +203,39 @@
     /* Info Bar & Legend */
     .chart-info-bar {
         position: absolute; top: 0; left: 0; right: 0; z-index: 50;
-        padding: 8px 12px; background: #131722; border-bottom: 1px solid #2a2e39;
-        pointer-events: none; display: flex; flex-wrap: wrap; gap: 12px;
-        font-family: 'Roboto', sans-serif; font-size: 13px; color: #b2b5be;
+        padding: 8px 16px; background: #131722; border-bottom: 1px solid #2a2e39;
+        pointer-events: none; display: flex; flex-wrap: wrap; gap: 16px;
+        font-family: 'Roboto', sans-serif; font-size: 14px; color: #b2b5be;
     }
-    .info-group { display: flex; gap: 4px; align-items: center; white-space: nowrap; }
+    .info-group { display: flex; gap: 6px; align-items: center; white-space: nowrap; }
     .info-value { font-weight: bold; color: #d1d4dc; font-family: 'Monaco', monospace; }
     
     .c-ma { color: #FFD700; } .c-bb { color: #2962ff; } .c-up { color: #ef5350; } .c-down { color: #26a69a; }
     
     .indicator-legend-sub {
-        position: absolute; top: 4px; left: 8px; z-index: 10;
+        position: absolute; top: 6px; left: 10px; z-index: 10;
         font-size: 11px; font-family: monospace; color: #787b86; pointer-events: none;
     }
     
     #loading {
         position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.7); z-index: 100;
+        background: rgba(0,0,0,0.8); z-index: 100;
         display: none; justify-content: center; align-items: center;
-        color: white; font-weight: bold; font-size: 16px; backdrop-filter: blur(2px);
+        color: white; font-weight: bold; font-size: 18px; backdrop-filter: blur(4px);
     }
 
     /* --- 5. RWD Media Queries --- */
     
     @media (max-width: 600px) {
-        /* On mobile, reduce side padding slightly but keep gap */
-        .container { padding: 10px 10px 20px 10px; gap: 8px; }
+        .container { padding: 10px 12px 30px 12px; gap: 10px; }
         
-        .toolbar { gap: 8px; padding: 8px; }
-        .symbol-info { width: 100%; margin-bottom: 4px; flex-direction: row; justify-content: space-between; align-items: center; }
+        .toolbar { gap: 10px; padding: 10px; }
+        .symbol-info { width: 100%; margin-bottom: 6px; flex-direction: row; justify-content: space-between; align-items: center; }
         .symbol-status { display: none; }
         .search-group { max-width: 100%; margin-right: 0; }
         
         .zoom-group { 
-            width: 100%; justify-content: flex-end; margin-top: 4px; border-top: 1px solid #2a2e39; padding-top: 4px; 
+            width: 100%; justify-content: flex-end; margin-top: 6px; border-top: 1px solid #2a2e39; padding-top: 6px; 
         }
         .zoom-btn { flex: 1; text-align: center; }
 
@@ -235,7 +245,8 @@
 
         .report-grid { grid-template-columns: 1fr; }
         .action-box { grid-template-columns: 1fr; }
-        .chart-info-bar { font-size: 11px; padding: 4px 8px; gap: 8px; }
+        .chart-info-bar { font-size: 12px; padding: 6px 10px; gap: 8px; }
+        .info-group { gap: 3px; }
     }
 
     @media (min-width: 601px) and (max-width: 1024px) {
@@ -671,15 +682,16 @@
             const takeProfit = bbUp;
             const entryPrice = trendScore > 0 ? ma : bbLow; 
 
+            // Fix: Use new p-tag classes for highlights
             if (trendScore >= 1) { 
-                adviceHeld = `趨勢多頭，建議<span class="highlight-bull">續抱</span>。移動停損設於月線 <span class="price-tag">${stopLoss.toFixed(0)}</span>，若爆量跌破則獲利了結。目標價看上軌 <span class="price-tag">${takeProfit.toFixed(0)}</span>。`;
-                adviceEmpty = `多頭格局，不宜追高。建議等待拉回至月線 <span class="price-tag">${entryPrice.toFixed(0)}</span> 附近量縮止穩後佈局。`;
+                adviceHeld = `趨勢多頭，建議<span class="highlight-bull">續抱</span>。移動停損設於月線 <span class="p-tag-sell">${stopLoss.toFixed(0)}</span>，若爆量跌破則獲利了結。目標價看上軌 <span class="p-tag-buy">${takeProfit.toFixed(0)}</span>。`;
+                adviceEmpty = `多頭格局，不宜追高。建議等待拉回至月線 <span class="p-tag-buy">${entryPrice.toFixed(0)}</span> 附近量縮止穩後佈局。`;
             } else if (trendScore <= -1) {
-                adviceHeld = `趨勢空頭，建議反彈至月線 <span class="price-tag">${ma.toFixed(0)}</span> 附近<span class="highlight-bear">減碼或出場</span>。若跌破下軌 <span class="price-tag">${bbLow.toFixed(0)}</span> 則需嚴格停損。`;
+                adviceHeld = `趨勢空頭，建議反彈至月線 <span class="p-tag-sell">${ma.toFixed(0)}</span> 附近<span class="highlight-bear">減碼或出場</span>。若跌破下軌 <span class="p-tag-sell">${bbLow.toFixed(0)}</span> 則需嚴格停損。`;
                 adviceEmpty = `空方勢弱，建議<span class="highlight-neutral">觀望</span>。若欲搶反彈，需待股價站回月線或出現底部訊號，勿輕易摸底。`;
             } else {
-                adviceHeld = `區間震盪，建議<span class="highlight-neutral">區間操作</span>。接近上軌 <span class="price-tag">${takeProfit.toFixed(0)}</span> 減碼，接近下軌 <span class="price-tag">${bbLow.toFixed(0)}</span> 可回補。`;
-                adviceEmpty = `箱型整理，可於下軌 <span class="price-tag">${bbLow.toFixed(0)}</span> 附近嘗試短多，跌破則停損。`;
+                adviceHeld = `區間震盪，建議<span class="highlight-neutral">區間操作</span>。接近上軌 <span class="p-tag-sell">${takeProfit.toFixed(0)}</span> 減碼，接近下軌 <span class="p-tag-buy">${bbLow.toFixed(0)}</span> 可回補。`;
+                adviceEmpty = `箱型整理，可於下軌 <span class="p-tag-buy">${bbLow.toFixed(0)}</span> 附近嘗試短多，跌破則停損。`;
             }
 
             const reportHTML = `
