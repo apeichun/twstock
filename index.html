@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>台股智慧分析 App - v8.9 (Visual Enhanced)</title>
+<title>台股智慧分析 App - v9.1 (View Enhanced)</title>
 <script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
 <style>
     /* Reset & Base */
@@ -159,7 +159,7 @@
     .action-title { font-size: 13px; font-weight: bold; color: #fff; margin-bottom: 8px; }
     .action-content { font-size: 13px; color: #d1d4dc; line-height: 1.5; }
     
-    /* NEW: High Visibility Price Tags */
+    /* Price Tags */
     .p-tag-buy { 
         background: #ef5350; color: #fff; padding: 2px 6px; border-radius: 4px; font-weight: bold; 
         font-family: 'Monaco', monospace; box-shadow: 0 2px 4px rgba(239, 83, 80, 0.3);
@@ -178,9 +178,9 @@
         flex: 1; 
         display: flex; 
         flex-direction: column; 
-        /* Fix: Increase padding around charts */
-        padding: 20px 30px 50px 30px; 
-        gap: 12px; 
+        /* Adjusted padding to minimize whitespace */
+        padding: 10px 24px 20px 24px; 
+        gap: 8px; 
         overflow: hidden; 
         background: transparent; 
     }
@@ -190,15 +190,16 @@
         width: 100%; 
         background: #131722; 
         overflow: hidden; 
-        border-radius: 12px; /* Softer corners */
+        border-radius: 12px; 
         border: 1px solid #2a2e39;
-        box-shadow: 0 8px 16px rgba(0,0,0,0.3); /* Deeper shadow */
+        box-shadow: 0 8px 16px rgba(0,0,0,0.3); 
     }
     
-    #main { flex: 10; } 
-    #vol { flex: 2; min-height: 40px; }
-    #macd { flex: 3; min-height: 50px; }
-    #rsi { flex: 2; min-height: 40px; }
+    /* Fix: Increased flex ratio for Main Chart */
+    #main { flex: 20; min-height: 300px; } /* Give main chart significantly more space */
+    #vol { flex: 3; min-height: 40px; }
+    #macd { flex: 4; min-height: 50px; }
+    #rsi { flex: 3; min-height: 40px; }
 
     /* Info Bar & Legend */
     .chart-info-bar {
@@ -227,22 +228,16 @@
     /* --- 5. RWD Media Queries --- */
     
     @media (max-width: 600px) {
-        .container { padding: 10px 12px 30px 12px; gap: 10px; }
-        
+        .container { padding: 8px 10px 16px 10px; gap: 6px; }
         .toolbar { gap: 10px; padding: 10px; }
         .symbol-info { width: 100%; margin-bottom: 6px; flex-direction: row; justify-content: space-between; align-items: center; }
         .symbol-status { display: none; }
         .search-group { max-width: 100%; margin-right: 0; }
-        
-        .zoom-group { 
-            width: 100%; justify-content: flex-end; margin-top: 6px; border-top: 1px solid #2a2e39; padding-top: 6px; 
-        }
+        .zoom-group { width: 100%; justify-content: flex-end; margin-top: 6px; border-top: 1px solid #2a2e39; padding-top: 6px; }
         .zoom-btn { flex: 1; text-align: center; }
-
         #macd, #rsi { display: none; } 
         #main { flex: 4; } 
         #vol { flex: 1; }
-
         .report-grid { grid-template-columns: 1fr; }
         .action-box { grid-template-columns: 1fr; }
         .chart-info-bar { font-size: 12px; padding: 6px 10px; gap: 8px; }
@@ -306,7 +301,7 @@
         let isUpdatingData = false;
         let lastSignal = null; 
 
-        // --- 1. FinMind Fetcher ---
+        // --- 1. FinMind Fetcher (Fix: Sort & Filter) ---
         function getStartDate() {
             const d = new Date();
             d.setFullYear(d.getFullYear() - 1); 
@@ -320,14 +315,19 @@
                 const response = await fetch(url);
                 const json = await response.json();
                 if (json.msg === 'success' && json.data.length > 0) {
-                    return json.data.map(item => ({
-                        time: item.date,
-                        open: item.open,
-                        high: item.max,
-                        low: item.min,
-                        close: item.close,
-                        vol: item.Trading_Volume
-                    }));
+                    // Fix: Filter invalid data & Sort by date ascending
+                    const validData = json.data
+                        .filter(item => item.close > 0 && item.Trading_Volume > 0)
+                        .sort((a, b) => new Date(a.date) - new Date(b.date))
+                        .map(item => ({
+                            time: item.date,
+                            open: item.open,
+                            high: item.max,
+                            low: item.min,
+                            close: item.close,
+                            vol: item.Trading_Volume
+                        }));
+                    return validData;
                 } else { return null; }
             } catch (error) { return null; }
         }
@@ -389,10 +389,19 @@
             const markers = [];
             const hist = inds.macd.hist;
             lastSignal = null; 
+            // Fix: Check indices bounds to prevent errors
             for (let i = 26; i < data.length; i++) {
                 const time = data[i].time;
-                const prevHist = hist[i-1].value;
-                const currHist = hist[i].value;
+                // find corresponding indicator values. Note: arrays might not be perfectly aligned by index 0 due to different start times
+                // Simplification: We assume filtered data is continuous enough.
+                const currHistItem = hist.find(h => h.time === time);
+                const prevHistItem = hist.find(h => h.time === data[i-1].time);
+                
+                if (!currHistItem || !prevHistItem) continue;
+
+                const prevHist = prevHistItem.value;
+                const currHist = currHistItem.value;
+                
                 if (prevHist < 0 && currHist > 0) {
                     markers.push({ time: time, position: 'belowBar', color: '#ef5350', shape: 'arrowUp', text: '買' });
                     lastSignal = { type: 'BUY', time: time, price: data[i].close };
