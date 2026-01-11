@@ -3,25 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>台股智慧分析 App - v9.5 (Best View)</title>
+<title>台股智慧分析 App - v9.6 (Floating Tooltip)</title>
 <script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
 <style>
     /* Reset & Base */
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    
-    /* Fix: Remove fixed height 100vh and allow scrolling */
-    body { 
-        background: #0e1015; 
-        margin: 0; 
-        padding: 0; 
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-        color: #d1d4dc; 
-        min-height: 100vh; /* Minimum height, allows growing */
-        display: flex; 
-        flex-direction: column; 
-        overflow-y: auto; /* Enable vertical scroll */
-        overflow-x: hidden;
-    }
+    body { background: #0e1015; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #d1d4dc; height: 100vh; display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; }
     
     /* --- 1. Header Toolbar --- */
     .toolbar {
@@ -36,8 +23,7 @@
         gap: 12px;
         box-shadow: 0 4px 8px rgba(0,0,0,0.4);
         z-index: 60;
-        position: sticky; /* Make toolbar sticky */
-        top: 0;
+        position: sticky; top: 0;
     }
     
     .symbol-info { display: flex; flex-direction: column; min-width: 100px; }
@@ -55,124 +41,57 @@
         border-radius: 6px;
         padding: 6px 12px;
         border: 1px solid #363a45;
-        flex-grow: 1; 
-        max-width: 240px;
+        flex-grow: 1; max-width: 240px;
     }
-    .search-input {
-        background: transparent;
-        border: none;
-        color: #fff;
-        font-size: 16px; 
-        width: 100%;
-        outline: none;
-        text-transform: uppercase;
-        font-weight: bold;
-    }
-    .search-btn {
-        background: #2962ff;
-        border: none;
-        color: white;
-        border-radius: 4px;
-        padding: 6px 14px;
-        font-size: 14px;
-        cursor: pointer;
-        margin-left: 8px;
-        font-weight: bold;
-        white-space: nowrap;
-    }
+    .search-input { background: transparent; border: none; color: #fff; font-size: 16px; width: 100%; outline: none; text-transform: uppercase; font-weight: bold; }
+    .search-btn { background: #2962ff; border: none; color: white; border-radius: 4px; padding: 6px 14px; font-size: 14px; cursor: pointer; margin-left: 8px; font-weight: bold; white-space: nowrap; }
     .search-btn:active { transform: translateY(1px); }
 
     /* Zoom Buttons */
     .zoom-group { display: flex; gap: 6px; }
-    .zoom-btn {
-        background: transparent;
-        border: 1px solid #363a45;
-        color: #9db2bd;
-        padding: 6px 12px;
-        font-size: 13px;
-        border-radius: 6px;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
+    .zoom-btn { background: transparent; border: 1px solid #363a45; color: #9db2bd; padding: 6px 12px; font-size: 13px; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
     .zoom-btn:hover { background: #2a2e39; color: #fff; }
     .zoom-btn.active { background: #2962ff; color: white; border-color: #2962ff; box-shadow: 0 0 8px rgba(41, 98, 255, 0.4); }
 
     /* --- 2. Strategy Dashboard --- */
     .strategy-dashboard {
-        background: #181c27;
-        padding: 12px 24px;
-        border-bottom: 1px solid #000;
-        display: flex;
-        gap: 12px;
-        overflow-x: auto; 
-        flex-shrink: 0;
-        align-items: center;
-        scrollbar-width: none; 
+        background: #181c27; padding: 12px 24px; border-bottom: 1px solid #000;
+        display: flex; gap: 12px; overflow-x: auto; flex-shrink: 0; align-items: center; scrollbar-width: none; 
     }
     .strategy-dashboard::-webkit-scrollbar { display: none; }
     
     .strategy-card {
-        background: #2a2e39;
-        padding: 10px 14px;
-        border-radius: 8px;
-        min-width: 110px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        border-left: 4px solid #787b86;
-        flex-shrink: 0; 
-        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        background: #2a2e39; padding: 10px 14px; border-radius: 8px; min-width: 110px;
+        display: flex; flex-direction: column; justify-content: center; border-left: 4px solid #787b86;
+        flex-shrink: 0; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
     }
     .card-title { font-size: 11px; color: #9aa0b0; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
     .card-value { font-size: 15px; font-weight: bold; color: #e0e0e0; white-space: nowrap; }
-    
     .border-bull { border-left-color: #e91e63 !important; }
     .border-bear { border-left-color: #ffeb3b !important; }
     
     .recommendation-badge {
-        padding: 10px 20px;
-        border-radius: 8px;
-        font-weight: bold;
-        color: white;
-        font-size: 16px;
-        margin-left: auto;
-        text-align: center;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-        white-space: nowrap;
-        flex-shrink: 0;
+        padding: 10px 20px; border-radius: 8px; font-weight: bold; color: white; font-size: 16px; margin-left: auto; text-align: center;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.4); white-space: nowrap; flex-shrink: 0;
     }
     .rec-buy { background: linear-gradient(135deg, #e91e63 0%, #ad1457 100%); }
     .rec-sell { background: linear-gradient(135deg, #fdd835 0%, #fbc02d 100%); color: #000 !important; }
     .rec-hold { background: linear-gradient(135deg, #787b86 0%, #4a4a4a 100%); }
 
-    /* --- 3. Analysis Report (Enhanced Layout) --- */
+    /* --- 3. Analysis Report --- */
     .analysis-report {
-        background: #131722;
-        padding: 16px 24px;
-        border-bottom: 1px solid #000;
-        display: none; 
-        flex-direction: column;
-        gap: 12px;
-        flex-shrink: 0;
-        /* max-height: 400px; Remove max-height to show full content */
-        /* overflow-y: auto; Remove internal scroll */
+        background: #131722; padding: 16px 24px; border-bottom: 1px solid #000;
+        display: none; flex-direction: column; gap: 12px; flex-shrink: 0;
+        max-height: 280px; overflow-y: auto; -webkit-overflow-scrolling: touch;
     }
     .report-header { font-size: 15px; font-weight: bold; color: #40c4ff; display: flex; align-items: center; gap: 6px; margin-bottom: 6px; border-bottom: 1px solid #2a2e39; padding-bottom: 8px; }
-    
     .report-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    
-    .report-section {
-        background: #1e222d; padding: 12px; border-radius: 8px; border: 1px solid #2a2e39;
-        display: flex; flex-direction: column; gap: 4px;
-    }
+    .report-section { background: #1e222d; padding: 12px; border-radius: 8px; border: 1px solid #2a2e39; display: flex; flex-direction: column; gap: 4px; }
     .section-title { font-size: 12px; color: #40c4ff; font-weight: bold; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
-    
     .report-text { font-size: 13px; color: #b2b5be; line-height: 1.6; word-break: break-word; }
-    
     .highlight-bull { color: #e91e63; font-weight: bold; }
     .highlight-bear { color: #ffeb3b; font-weight: bold; }
     .highlight-neutral { color: #d1d4dc; font-weight: bold; }
-    
     .report-item-full { grid-column: 1 / -1; }
     
     .action-box { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 5px; }
@@ -182,70 +101,59 @@
     .action-title { font-size: 13px; font-weight: bold; color: #fff; margin-bottom: 8px; }
     .action-content { font-size: 13px; color: #d1d4dc; line-height: 1.5; }
     
-    /* Price Tags */
     .p-tag-buy { background: #e91e63; color: #fff; padding: 1px 5px; border-radius: 4px; font-weight: bold; font-family: 'Monaco', monospace; }
     .p-tag-sell { background: #ffeb3b; color: #000; padding: 1px 5px; border-radius: 4px; font-weight: bold; font-family: 'Monaco', monospace; }
     .p-tag-neu { background: #ffb74d; color: #000; padding: 1px 5px; border-radius: 4px; font-weight: bold; font-family: 'Monaco', monospace; }
 
     /* --- 4. Chart Layout --- */
-    .container { 
-        /* Remove flex grow, set specific height */
-        height: 650px; 
-        min-height: 500px;
-        display: flex; 
-        flex-direction: column; 
-        padding: 20px 30px 50px 30px; 
-        gap: 8px; 
-        background: transparent; 
-        /* Ensure it doesn't shrink to 0 */
-        flex-shrink: 0;
-    }
-    
-    .chart-box { 
-        position: relative; width: 100%; background: #131722; overflow: hidden; 
-        border-radius: 12px; border: 1px solid #2a2e39; box-shadow: 0 8px 16px rgba(0,0,0,0.3); 
-    }
+    .container { height: 650px; min-height: 500px; display: flex; flex-direction: column; padding: 20px 30px 50px 30px; gap: 8px; background: transparent; flex-shrink: 0; position: relative; }
+    .chart-box { position: relative; width: 100%; background: #131722; overflow: hidden; border-radius: 12px; border: 1px solid #2a2e39; box-shadow: 0 8px 16px rgba(0,0,0,0.3); }
     
     #main { flex: 20; min-height: 300px; } 
     #vol { flex: 3; min-height: 40px; }
     #macd { flex: 4; min-height: 50px; }
     #rsi { flex: 3; min-height: 40px; }
 
-    /* Info Bar & Legend */
-    .chart-info-bar {
-        position: absolute; top: 0; left: 0; right: 0; z-index: 50;
-        padding: 8px 16px; background: #131722; border-bottom: 1px solid #2a2e39;
-        pointer-events: none; display: flex; flex-wrap: wrap; gap: 16px;
-        font-family: 'Roboto', sans-serif; font-size: 14px; color: #b2b5be;
+    /* New: Floating Tooltip (The moving box) */
+    .floating-tooltip {
+        position: absolute;
+        width: 160px;
+        background-color: rgba(14, 16, 21, 0.95);
+        border: 1px solid #2a2e39;
+        border-radius: 6px;
+        padding: 8px;
+        z-index: 1000;
+        pointer-events: none;
+        display: none;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        font-family: 'Monaco', monospace;
+        font-size: 11px;
+        line-height: 1.5;
+        backdrop-filter: blur(4px);
     }
-    .info-group { display: flex; gap: 6px; align-items: center; white-space: nowrap; }
-    .info-value { font-weight: bold; color: #d1d4dc; font-family: 'Monaco', monospace; }
-    
-    .c-ma5 { color: #40c4ff; }
-    .c-ma20 { color: #FFD700; } 
-    .c-bb { color: #2962ff; } 
-    .c-up { color: #e91e63; } .c-down { color: #ffeb3b; }
-    
-    .indicator-legend-sub {
-        position: absolute; top: 6px; left: 10px; z-index: 10;
-        font-size: 11px; font-family: monospace; color: #787b86; pointer-events: none;
-    }
-    
-    #loading {
-        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.8); z-index: 100;
-        display: none; justify-content: center; align-items: center;
-        color: white; font-weight: bold; font-size: 18px; backdrop-filter: blur(4px);
-    }
+    .ft-row { display: flex; justify-content: space-between; margin-bottom: 2px; }
+    .ft-label { color: #787b86; }
+    .ft-value { color: #d1d4dc; font-weight: bold; }
+    .ft-header { color: #40c4ff; border-bottom: 1px solid #2a2e39; padding-bottom: 4px; margin-bottom: 6px; font-weight: bold; font-size: 12px; }
 
-    /* --- 5. RWD Media Queries --- */
+    /* Static Legend (For Indicators) */
+    .chart-legend {
+        position: absolute; top: 0; left: 0; right: 0; z-index: 50;
+        padding: 6px 12px; pointer-events: none; display: flex; flex-wrap: wrap; gap: 12px;
+        font-family: 'Roboto', sans-serif; font-size: 11px; color: #b2b5be;
+    }
+    .legend-item { display: flex; gap: 4px; align-items: center; }
+    .legend-val { font-weight: bold; color: #d1d4dc; font-family: 'Monaco', monospace; }
+    .c-ma5 { color: #40c4ff; } .c-ma20 { color: #FFD700; } .c-bb { color: #2962ff; } 
+    .c-up { color: #e91e63; } .c-down { color: #ffeb3b; } /* Colors match */
+
+    .indicator-legend-sub { position: absolute; top: 4px; left: 10px; z-index: 10; font-size: 11px; font-family: monospace; color: #787b86; pointer-events: none; }
+    
+    #loading { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; display: none; justify-content: center; align-items: center; color: white; font-weight: bold; font-size: 18px; backdrop-filter: blur(4px); }
+
+    /* --- 5. RWD --- */
     @media (max-width: 600px) {
-        .container { 
-            padding: 8px 10px 16px 10px; 
-            gap: 6px; 
-            /* Smaller height for mobile charts */
-            height: 500px;
-        }
+        .container { padding: 8px 10px 16px 10px; gap: 6px; height: 500px; }
         .toolbar { gap: 10px; padding: 10px; position: sticky; top: 0; }
         .symbol-info { width: 100%; margin-bottom: 6px; flex-direction: row; justify-content: space-between; align-items: center; }
         .symbol-status { display: none; }
@@ -257,10 +165,7 @@
         #vol { flex: 1; }
         .report-grid { grid-template-columns: 1fr; }
         .action-box { grid-template-columns: 1fr; }
-        .chart-info-bar { font-size: 12px; padding: 6px 10px; gap: 8px; }
-        .info-group { gap: 3px; }
     }
-
     @media (min-width: 601px) and (max-width: 1024px) {
         .report-grid { grid-template-columns: 1fr 1fr; }
         #macd, #rsi { flex: 1.5; }
@@ -290,18 +195,20 @@
         </div>
     </div>
     
-    <div class="strategy-dashboard" id="dashboard">
-        <!-- AI 策略卡片 -->
-    </div>
-    
-    <!-- Detailed Report -->
+    <div class="strategy-dashboard" id="dashboard"></div>
     <div class="analysis-report" id="analysis-report"></div>
 
     <div class="container">
+        <!-- New: Floating Tooltip Element inside Container -->
+        <div id="floating-tooltip" class="floating-tooltip"></div>
+
         <div id="main" class="chart-box">
-            <!-- Integrated Info Bar -->
-            <div class="chart-info-bar" id="main-info-bar">
-                <span class="info-group">載入中...</span>
+            <!-- Static Legend for Indicators only -->
+            <div class="chart-legend" id="main-legend">
+                <span class="legend-item"><span class="c-ma5">MA5:</span> <span class="legend-val c-ma5" id="l-ma5">--</span></span>
+                <span class="legend-item"><span class="c-ma20">MA20:</span> <span class="legend-val c-ma20" id="l-ma20">--</span></span>
+                <span class="legend-item"><span class="c-bb">BB:</span> <span class="legend-val c-bb" id="l-bb">--</span></span>
+                <span class="legend-item"><span class="c-up">▲買</span> / <span class="c-down">▼賣</span></span>
             </div>
         </div>
         <div id="vol" class="chart-box"><div class="indicator-legend-sub">Vol: <span id="val-vol">--</span></div></div>
@@ -312,13 +219,11 @@
     </div>
 
     <script>
-        // --- Global State ---
         let currentRawData = [];
         let maps = {}; 
         let isUpdatingData = false;
         let lastSignal = null; 
 
-        // --- 1. FinMind Fetcher ---
         function getStartDate() {
             const d = new Date();
             d.setFullYear(d.getFullYear() - 1); 
@@ -348,20 +253,17 @@
             } catch (error) { return null; }
         }
 
-        // --- 2. Indicators (Updated: Added MA5) ---
         function calculateIndicators(data) {
             const closes = data.map(d => d.close);
-            const maData = []; // MA20
-            const ma5Data = []; // MA5
+            const maData = [];
+            const ma5Data = [];
             const bbUp = [], bbLow = [];
             
             for (let i = 0; i < data.length; i++) {
-                // MA5
                 if (i >= 4) {
                     const sum5 = closes.slice(i-4, i+1).reduce((a,b)=>a+b,0);
                     ma5Data.push({ time: data[i].time, value: sum5/5 });
                 }
-                // MA20 & BB
                 if (i >= 19) {
                     const slice = closes.slice(i-19, i+1);
                     const mean = slice.reduce((a,b)=>a+b,0)/20;
@@ -431,7 +333,6 @@
             return markers;
         }
 
-        // --- 3. Init Charts ---
         const dom = {
             main: document.getElementById('main'),
             vol: document.getElementById('vol'),
@@ -441,7 +342,6 @@
         const commonOptions = {
             layout: { background: { color: '#131722' }, textColor: '#d1d4dc' },
             grid: { vertLines: { color: '#1f2937' }, horzLines: { color: '#1f2937' } },
-            // Fix: Increased rightOffset to 150 for better visibility of latest data
             timeScale: { borderColor: '#2a2e39', timeVisible: true, rightOffset: 150, barSpacing: 12, minBarSpacing: 2 },
             rightPriceScale: { borderColor: '#2a2e39', scaleMargins: { top: 0.1, bottom: 0.1 } },
             crosshair: { mode: 1, vertLine: { color: '#758696', style: 3, labelBackgroundColor: '#758696' } }
@@ -454,10 +354,8 @@
             mainChart = LightweightCharts.createChart(dom.main, commonOptions);
             candleSeries = mainChart.addCandlestickSeries({ upColor: '#e91e63', downColor: '#26a69a', borderVisible: false, wickUpColor: '#e91e63', wickDownColor: '#26a69a' });
             
-            // Added MA5 Series
             ma5Series = mainChart.addLineSeries({ color: '#40c4ff', lineWidth: 1, crosshairMarkerVisible: false });
             maSeries = mainChart.addLineSeries({ color: '#FFD700', lineWidth: 1, crosshairMarkerVisible: false });
-            
             upperSeries = mainChart.addLineSeries({ color: '#2962ff', lineWidth: 2, crosshairMarkerVisible: false });
             lowerSeries = mainChart.addLineSeries({ color: '#2962ff', lineWidth: 2, crosshairMarkerVisible: false });
 
@@ -491,7 +389,6 @@
         }
         initCharts();
 
-        // --- 4. Logic ---
         async function loadStock() {
             const input = document.getElementById('stock-input').value.trim();
             if (!input) return;
@@ -524,7 +421,7 @@
             candleSeries.setData(data);
             candleSeries.setMarkers(markers);
             maSeries.setData(inds.ma);
-            ma5Series.setData(inds.ma5); // Set MA5 Data
+            ma5Series.setData(inds.ma5);
             upperSeries.setData(inds.bbUp);
             lowerSeries.setData(inds.bbLow);
             volSeries.setData(data.map(r => ({ time: r.time, value: r.vol, color: r.close >= r.open ? 'rgba(239, 83, 80, 0.5)' : 'rgba(38, 166, 154, 0.5)' })));
@@ -547,65 +444,77 @@
 
             isUpdatingData = false;
             generateStrategy(data, inds);
-            
-            // Fix: Use default Zoom instead of fitContent for better initial view
             setZoom(180);
         }
 
-        // --- Integrated Tooltip & Legend ---
-        function updateTooltip(time) {
-            const d = maps.data.get(time);
+        // --- New Floating Tooltip Logic ---
+        function updateTooltip(param) {
+            const tooltip = document.getElementById('floating-tooltip');
+            
+            // 1. Hide if mouse out
+            if (!param.point || !param.time || !maps.data) {
+                tooltip.style.display = 'none';
+                return;
+            }
+
+            const d = maps.data.get(param.time);
             if (!d) return;
 
-            const idx = currentRawData.findIndex(r => r.time === time);
+            // 2. Show & Position
+            tooltip.style.display = 'block';
+            const container = document.querySelector('.container');
+            const box = container.getBoundingClientRect();
+            
+            // Position relative to the container
+            let left = param.point.x + 20; 
+            let top = param.point.y + 20;
+
+            // Boundary check (keep inside main chart area approximately)
+            if (left > box.width - 180) left = param.point.x - 180;
+            if (top > 400) top = 400; // Limit vertical
+
+            tooltip.style.left = left + 'px';
+            tooltip.style.top = top + 'px';
+
+            // 3. Content
+            const idx = currentRawData.findIndex(r => r.time === param.time);
             let change = 0, changeP = 0;
             if (idx > 0) {
                 const prev = currentRawData[idx-1];
                 change = d.close - prev.close;
                 changeP = (change / prev.close) * 100;
             }
-            const colorClass = change >= 0 ? 'c-up' : 'c-down';
+            const color = change >= 0 ? '#ef5350' : '#26a69a';
             const sign = change >= 0 ? '+' : '';
 
-            // Update the unified top bar
-            const infoBar = document.getElementById('main-info-bar');
-            
-            // Format values
-            const maVal = (maps.ma.get(time) || 0).toFixed(2);
-            const ma5Val = (maps.ma5.get(time) || 0).toFixed(2);
-            const bbUpVal = (maps.bbUp.get(time) || 0).toFixed(2);
-            const bbLowVal = (maps.bbLow.get(time) || 0).toFixed(2);
-
-            infoBar.innerHTML = `
-                <span class="info-group" style="color:#fff">${time}</span>
-                <span class="info-group">O:<span class="info-value">${d.open}</span></span>
-                <span class="info-group">H:<span class="info-value">${d.high}</span></span>
-                <span class="info-group">L:<span class="info-value">${d.low}</span></span>
-                <span class="info-group">C:<span class="info-value ${colorClass}">${d.close}</span></span>
-                <span class="info-group ${colorClass}">${sign}${change.toFixed(1)} (${sign}${changeP.toFixed(2)}%)</span>
-                <span class="info-group" style="margin-left:10px;"><span class="c-ma5">MA5:</span> <span class="info-value c-ma5">${ma5Val}</span></span>
-                <span class="info-group"><span class="c-ma20">MA20:</span> <span class="info-value c-ma20">${maVal}</span></span>
+            tooltip.innerHTML = `
+                <div class="ft-header">${param.time}</div>
+                <div class="ft-row"><span class="ft-label">開盤</span> <span class="ft-value">${d.open}</span></div>
+                <div class="ft-row"><span class="ft-label">最高</span> <span class="ft-value">${d.high}</span></div>
+                <div class="ft-row"><span class="ft-label">最低</span> <span class="ft-value">${d.low}</span></div>
+                <div class="ft-row"><span class="ft-label">收盤</span> <span class="ft-value" style="color:${color}">${d.close}</span></div>
+                <div class="ft-row"><span class="ft-label">漲跌</span> <span class="ft-value" style="color:${color}">${sign}${change.toFixed(1)} (${changeP.toFixed(2)}%)</span></div>
+                <div class="ft-row"><span class="ft-label">成交</span> <span class="ft-value">${(d.vol/1000).toFixed(0)}K</span></div>
             `;
 
-            // Sub-chart legends
+            // Update Legend (Indicators)
             const fmt = v => v ? v.toFixed(2) : '--';
-            let volStr = d.vol >= 1000 ? (d.vol/1000).toFixed(0) + 'K' : d.vol;
-            document.getElementById('val-vol').innerText = volStr;
-            document.getElementById('val-dif').innerText = fmt(maps.macd.get(time));
-            document.getElementById('val-dem').innerText = fmt(maps.signal.get(time));
-            const osc = maps.hist.get(time);
+            document.getElementById('l-ma5').innerText = fmt(maps.ma5.get(param.time));
+            document.getElementById('l-ma20').innerText = fmt(maps.ma.get(param.time));
+            document.getElementById('l-bb').innerText = `${fmt(maps.bbUp.get(param.time))} / ${fmt(maps.bbLow.get(param.time))}`;
+            
+            document.getElementById('val-vol').innerText = d.vol.toLocaleString();
+            document.getElementById('val-dif').innerText = fmt(maps.macd.get(param.time));
+            document.getElementById('val-dem').innerText = fmt(maps.signal.get(param.time));
+            const osc = maps.hist.get(param.time);
             const elOsc = document.getElementById('val-osc');
             elOsc.innerText = fmt(osc);
             elOsc.style.color = osc >= 0 ? '#e91e63' : '#26a69a';
-            document.getElementById('val-rsi').innerText = fmt(maps.rsi.get(time));
+            document.getElementById('val-rsi').innerText = fmt(maps.rsi.get(param.time));
         }
 
-        mainChart.subscribeCrosshairMove(param => {
-            if (param.time && maps.data) updateTooltip(param.time);
-            else if (currentRawData.length > 0) updateTooltip(currentRawData[currentRawData.length-1].time);
-        });
+        mainChart.subscribeCrosshairMove(updateTooltip);
 
-        // --- AI Strategy Logic (Enhanced) ---
         function generateStrategy(data, inds) {
             if (!data || data.length === 0) return;
             const last = data[data.length-1];
@@ -618,7 +527,6 @@
             const bbUp = maps.bbUp.get(time) || 0;
             const bbLow = maps.bbLow.get(time) || 0;
 
-            // Trend Score
             let trendScore = 0;
             let maText = "";
             let maClass = "";
@@ -654,7 +562,6 @@
             if (trendScore >= 1.5) { recText = "強力買進"; recClass = "rec-buy"; }
             else if (trendScore <= -1.5) { recText = "偏空操作"; recClass = "rec-sell"; }
 
-            // 1. Dashboard
             document.getElementById('dashboard').innerHTML = `
                 <div class="strategy-card ${maClass}">
                     <div class="card-title">趨勢 (MA)</div>
@@ -677,15 +584,11 @@
                 </div>
             `;
 
-            // 2. Enhanced Report
-            
-            // Vol
             let volSum = 0; const volLookback = 5;
             for(let i=0; i<volLookback; i++) if(data.length > i) volSum += data[data.length-1-i].vol;
             const avgVol = volSum / volLookback;
             const volRatio = last.vol / avgVol;
 
-            // Trend Details
             const bias = ((last.close - ma) / ma * 100).toFixed(2);
             let trendDetail = "";
             if (ma5 > ma) {
@@ -697,7 +600,6 @@
                 if(last.close > ma5) trendDetail += " 股價站上五日線，試圖築底反彈。";
             }
 
-            // Bollinger & Vol
             const bandwidth = ((bbUp - bbLow) / ma * 100).toFixed(1); 
             let bbDetail = `通道寬度 ${bandwidth}%，`;
             if (parseFloat(bandwidth) < 5.0) bbDetail += `呈現壓縮狀態，波動率極低，<span class="highlight-bull">變盤在即</span>。`;
@@ -708,11 +610,9 @@
             else if (volRatio < 0.6) volDetail = `量能<span class="highlight-neutral">急縮</span> (均量 ${(avgVol/1000).toFixed(0)}K)，觀望氣氛濃。`;
             else volDetail = "量能溫和。";
 
-            // Support/Resistance
             const support = trendScore > 0 ? ma : bbLow;
             const pressure = trendScore < 0 ? ma : bbUp;
 
-            // Advice
             let adviceHeld = "", adviceEmpty = "";
             if (trendScore >= 1) { 
                 adviceHeld = `多頭續抱。防守點設於月線 <span class="p-tag-sell">${support.toFixed(0)}</span>。`;
@@ -722,7 +622,7 @@
                 adviceEmpty = `空方趨勢，建議觀望。等待站回月線再考慮進場。`;
             } else {
                 adviceHeld = `區間操作，上軌 <span class="p-tag-sell">${bbUp.toFixed(0)}</span> 獲利，下軌 <span class="p-tag-buy">${bbLow.toFixed(0)}</span> 回補。`;
-                adviceEmpty = `箱型震盪，下軌 <span class="p-tag-buy">${bbLow.toFixed(0)}</span> 附近嘗試短多，跌破則停損。`;
+                adviceEmpty = `箱型震盪，下軌 <span class="p-tag-buy">${bbLow.toFixed(0)}</span> 附近嘗試短多。`;
             }
 
             const reportHTML = `
