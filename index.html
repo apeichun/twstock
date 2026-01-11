@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>台股智慧分析 App - v9.6 (Floating Tooltip)</title>
+<title>台股智慧分析 App - v9.7 (Colorful Tooltip)</title>
 <script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
 <style>
     /* Reset & Base */
@@ -479,21 +479,31 @@
             // 3. Content
             const idx = currentRawData.findIndex(r => r.time === param.time);
             let change = 0, changeP = 0;
+            // Define colors
+            let closeColor = '#ffeb3b'; // Default yellow for flat
+            let sign = '';
+
             if (idx > 0) {
                 const prev = currentRawData[idx-1];
                 change = d.close - prev.close;
                 changeP = (change / prev.close) * 100;
+                
+                if (change > 0) {
+                    closeColor = '#ef5350'; // Red
+                    sign = '+';
+                } else if (change < 0) {
+                    closeColor = '#26a69a'; // Green
+                }
+                // else remain yellow
             }
-            const color = change >= 0 ? '#ef5350' : '#26a69a';
-            const sign = change >= 0 ? '+' : '';
 
             tooltip.innerHTML = `
                 <div class="ft-header">${param.time}</div>
-                <div class="ft-row"><span class="ft-label">開盤</span> <span class="ft-value">${d.open}</span></div>
-                <div class="ft-row"><span class="ft-label">最高</span> <span class="ft-value">${d.high}</span></div>
-                <div class="ft-row"><span class="ft-label">最低</span> <span class="ft-value">${d.low}</span></div>
-                <div class="ft-row"><span class="ft-label">收盤</span> <span class="ft-value" style="color:${color}">${d.close}</span></div>
-                <div class="ft-row"><span class="ft-label">漲跌</span> <span class="ft-value" style="color:${color}">${sign}${change.toFixed(1)} (${changeP.toFixed(2)}%)</span></div>
+                <div class="ft-row"><span class="ft-label">開盤</span> <span class="ft-value" style="color: #40c4ff">${d.open}</span></div>
+                <div class="ft-row"><span class="ft-label">最高</span> <span class="ft-value" style="color: #ef5350">${d.high}</span></div>
+                <div class="ft-row"><span class="ft-label">最低</span> <span class="ft-value" style="color: #26a69a">${d.low}</span></div>
+                <div class="ft-row"><span class="ft-label">收盤</span> <span class="ft-value" style="color:${closeColor}">${d.close}</span></div>
+                <div class="ft-row"><span class="ft-label">漲跌</span> <span class="ft-value" style="color:${closeColor}">${sign}${change.toFixed(1)} (${changeP.toFixed(2)}%)</span></div>
                 <div class="ft-row"><span class="ft-label">成交</span> <span class="ft-value">${(d.vol/1000).toFixed(0)}K</span></div>
             `;
 
@@ -527,6 +537,7 @@
             const bbUp = maps.bbUp.get(time) || 0;
             const bbLow = maps.bbLow.get(time) || 0;
 
+            // Trend Score
             let trendScore = 0;
             let maText = "";
             let maClass = "";
@@ -622,7 +633,7 @@
                 adviceEmpty = `空方趨勢，建議觀望。等待站回月線再考慮進場。`;
             } else {
                 adviceHeld = `區間操作，上軌 <span class="p-tag-sell">${bbUp.toFixed(0)}</span> 獲利，下軌 <span class="p-tag-buy">${bbLow.toFixed(0)}</span> 回補。`;
-                adviceEmpty = `箱型震盪，下軌 <span class="p-tag-buy">${bbLow.toFixed(0)}</span> 附近嘗試短多。`;
+                adviceEmpty = `箱型震盪，下軌 <span class="p-tag-buy">${bbLow.toFixed(0)}</span> 附近嘗試短多，跌破則停損。`;
             }
 
             const reportHTML = `
