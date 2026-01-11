@@ -3,12 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>台股智慧分析 App - v9.3 (Pro Report)</title>
+<title>台股智慧分析 App - v9.4 (Scrollable)</title>
 <script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
 <style>
     /* Reset & Base */
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body { background: #0e1015; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #d1d4dc; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+    
+    /* Fix: Remove fixed height 100vh and allow scrolling */
+    body { 
+        background: #0e1015; 
+        margin: 0; 
+        padding: 0; 
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+        color: #d1d4dc; 
+        min-height: 100vh; /* Minimum height, allows growing */
+        display: flex; 
+        flex-direction: column; 
+        overflow-y: auto; /* Enable vertical scroll */
+        overflow-x: hidden;
+    }
     
     /* --- 1. Header Toolbar --- */
     .toolbar {
@@ -23,6 +36,8 @@
         gap: 12px;
         box-shadow: 0 4px 8px rgba(0,0,0,0.4);
         z-index: 60;
+        position: sticky; /* Make toolbar sticky */
+        top: 0;
     }
     
     .symbol-info { display: flex; flex-direction: column; min-width: 100px; }
@@ -139,9 +154,8 @@
         flex-direction: column;
         gap: 12px;
         flex-shrink: 0;
-        max-height: 400px; /* Allow more height for details */
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
+        /* max-height: 400px; Remove max-height to show full content */
+        /* overflow-y: auto; Remove internal scroll */
     }
     .report-header { font-size: 15px; font-weight: bold; color: #40c4ff; display: flex; align-items: center; gap: 6px; margin-bottom: 6px; border-bottom: 1px solid #2a2e39; padding-bottom: 8px; }
     
@@ -175,8 +189,16 @@
 
     /* --- 4. Chart Layout --- */
     .container { 
-        flex: 1; display: flex; flex-direction: column; 
-        padding: 20px 30px 50px 30px; gap: 8px; overflow: hidden; background: transparent; 
+        /* Remove flex grow, set specific height */
+        height: 650px; 
+        min-height: 500px;
+        display: flex; 
+        flex-direction: column; 
+        padding: 20px 30px 50px 30px; 
+        gap: 8px; 
+        background: transparent; 
+        /* Ensure it doesn't shrink to 0 */
+        flex-shrink: 0;
     }
     
     .chart-box { 
@@ -218,8 +240,13 @@
 
     /* --- 5. RWD Media Queries --- */
     @media (max-width: 600px) {
-        .container { padding: 8px 10px 16px 10px; gap: 6px; }
-        .toolbar { gap: 10px; padding: 10px; }
+        .container { 
+            padding: 8px 10px 16px 10px; 
+            gap: 6px; 
+            /* Smaller height for mobile charts */
+            height: 500px;
+        }
+        .toolbar { gap: 10px; padding: 10px; position: sticky; top: 0; }
         .symbol-info { width: 100%; margin-bottom: 6px; flex-direction: row; justify-content: space-between; align-items: center; }
         .symbol-status { display: none; }
         .search-group { max-width: 100%; margin-right: 0; }
@@ -232,6 +259,11 @@
         .action-box { grid-template-columns: 1fr; }
         .chart-info-bar { font-size: 12px; padding: 6px 10px; gap: 8px; }
         .info-group { gap: 3px; }
+    }
+
+    @media (min-width: 601px) and (max-width: 1024px) {
+        .report-grid { grid-template-columns: 1fr 1fr; }
+        #macd, #rsi { flex: 1.5; }
     }
 </style>
 </head>
