@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>台股智慧分析 App - v10.6 (Larger Tooltip)</title>
+<title>台股智慧分析 App - v11.0 (Pattern Prediction)</title>
 <script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
 <style>
     /* Reset & Base */
@@ -53,43 +53,22 @@
     .zoom-btn:hover { background: #2a2e39; color: #fff; }
     .zoom-btn.active { background: #2962ff; color: white; border-color: #2962ff; box-shadow: 0 0 8px rgba(41, 98, 255, 0.4); }
 
-    /* --- NEW: History Bar --- */
+    /* --- History Bar --- */
     .history-bar {
-        background: #181b21;
-        padding: 8px 24px;
-        border-bottom: 1px solid #000;
-        display: flex;
-        gap: 8px;
-        overflow-x: auto;
-        white-space: nowrap;
-        scrollbar-width: none; /* Firefox */
-        align-items: center;
-        flex-shrink: 0;
+        background: #181b21; padding: 8px 24px; border-bottom: 1px solid #000;
+        display: flex; gap: 8px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; align-items: center; flex-shrink: 0;
     }
     .history-bar::-webkit-scrollbar { display: none; }
-    
     .history-label { font-size: 11px; color: #787b86; margin-right: 4px; font-weight: bold; text-transform: uppercase; }
-    
     .history-chip {
-        background: #2a2e39;
-        color: #b2b5be;
-        border: 1px solid #363a45;
-        padding: 4px 10px;
-        border-radius: 12px;
-        font-size: 12px;
-        cursor: pointer;
-        transition: all 0.2s;
-        display: flex;
-        align-items: center;
-        gap: 6px;
+        background: #2a2e39; color: #b2b5be; border: 1px solid #363a45; padding: 4px 10px; border-radius: 12px;
+        font-size: 12px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px;
     }
     .history-chip:hover { background: #363a45; color: #fff; border-color: #40c4ff; }
     .history-chip.active { background: #2962ff; color: white; border-color: #2962ff; }
-    
     .history-remove {
         width: 14px; height: 14px; display: flex; align-items: center; justify-content: center;
-        border-radius: 50%; background: rgba(0,0,0,0.2); font-size: 9px; line-height: 1;
-        opacity: 0.6; transition: opacity 0.2s;
+        border-radius: 50%; background: rgba(0,0,0,0.2); font-size: 9px; line-height: 1; opacity: 0.6; transition: opacity 0.2s;
     }
     .history-remove:hover { opacity: 1; background: #ff5252; color: white; }
 
@@ -145,6 +124,19 @@
     .highlight-neutral { color: #d1d4dc; font-weight: bold; }
     .report-item-full { grid-column: 1 / -1; }
     
+    /* New: Pattern Box */
+    .pattern-box {
+        margin-top: 5px;
+        padding: 8px;
+        background: #262a35;
+        border-radius: 4px;
+        border-left: 3px solid #787b86;
+        font-size: 13px;
+    }
+    .pattern-bull { border-left-color: #e91e63; color: #ffcdd2; }
+    .pattern-bear { border-left-color: #ffeb3b; color: #fff9c4; }
+    .pattern-neu { border-left-color: #d1d4dc; color: #e0e0e0; }
+
     .action-box { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 5px; }
     .action-card { background: #262a35; padding: 16px; border-radius: 8px; border-top: 4px solid #787b86; box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
     .action-card.held { border-top-color: #29b6f6; }
@@ -165,34 +157,27 @@
     #macd { flex: 4; min-height: 50px; }
     #rsi { flex: 3; min-height: 40px; }
 
-    /* Floating Tooltip (Fix: Larger Font) */
+    /* Floating Tooltip */
     .floating-tooltip {
         position: absolute;
-        width: 200px; /* Wider */
+        width: 200px;
         background-color: rgba(14, 16, 21, 0.95);
         border: 1px solid #2a2e39;
         border-radius: 6px;
-        padding: 10px; /* More padding */
+        padding: 10px;
         z-index: 1000;
         pointer-events: none;
         display: none;
         box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         font-family: 'Monaco', monospace;
-        font-size: 14px; /* Larger Font */
+        font-size: 14px;
         line-height: 1.5;
         backdrop-filter: blur(4px);
     }
     .ft-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
     .ft-label { color: #787b86; }
     .ft-value { color: #d1d4dc; font-weight: bold; }
-    .ft-header { 
-        color: #40c4ff; 
-        border-bottom: 1px solid #2a2e39; 
-        padding-bottom: 6px; 
-        margin-bottom: 8px; 
-        font-weight: bold; 
-        font-size: 15px; /* Larger Header */
-    }
+    .ft-header { color: #40c4ff; border-bottom: 1px solid #2a2e39; padding-bottom: 6px; margin-bottom: 8px; font-weight: bold; font-size: 15px; }
 
     /* Static Legend */
     .chart-legend {
@@ -255,19 +240,15 @@
         </div>
     </div>
     
-    <!-- History Bar -->
     <div class="history-bar" id="history-bar">
         <span class="history-label">最近搜尋:</span>
-        <!-- History items will be injected here -->
     </div>
     
     <div class="strategy-dashboard" id="dashboard"></div>
     <div class="analysis-report" id="analysis-report"></div>
 
     <div class="container">
-        <!-- Floating Tooltip -->
         <div id="floating-tooltip" class="floating-tooltip"></div>
-
         <div id="main" class="chart-box">
             <div class="chart-legend" id="main-legend">
                 <span class="legend-item"><span class="c-ma5">MA5:</span> <span class="legend-val c-ma5" id="l-ma5">--</span></span>
@@ -289,54 +270,36 @@
         let isUpdatingData = false;
         let lastSignal = null; 
         
-        // History State
         let searchHistory = JSON.parse(localStorage.getItem('stockHistory_v1')) || [];
 
-        // 股票名稱對照表 (v10.4)
+        // DB same as before (v10.4)
         const stockNameMap = {
-            // 半導體 / 電子
             "台積電": "2330", "聯電": "2303", "力積電": "6770", "世界": "5347", "聯發科": "2454",
             "鴻海": "2317", "台達電": "2308", "日月光": "3711", "聯詠": "3034", "瑞昱": "2379",
             "創意": "3443", "世芯": "3661", "力旺": "3529", "信驊": "5274", "祥碩": "5269",
             "南亞科": "2408", "華邦電": "2344", "旺宏": "2337", "群聯": "8299", "威剛": "3260",
-            
-            // AI / 電腦 / 網通 / 組裝
             "廣達": "2382", "緯創": "3231", "技嘉": "2376", "微星": "2377", "華碩": "2357",
             "宏碁": "2353", "英業達": "2356", "仁寶": "2324", "光寶科": "2301", "緯穎": "6669",
             "智邦": "2345", "台光電": "2383", "金像電": "2368", "健鼎": "3044", "欣興": "3037",
             "南電": "8046", "景碩": "3189", "臻鼎": "4958", "台燿": "6274", "台表科": "6278",
             "奇鋐": "3017", "雙鴻": "3324", "建準": "2421", "和碩": "4938",
-            
-            // 光電 / 面板 / 被動元件
             "大立光": "3008", "玉晶光": "3406", "友達": "2409", "群創": "3481", "彩晶": "6116",
             "國巨": "2327", "華新科": "2492", "臺慶科": "3357", "大毅": "2478", "中光電": "5371",
-            
-            // 金融
             "富邦金": "2881", "國泰金": "2882", "中信金": "2891", "兆豐金": "2886", "玉山金": "2884",
             "元大金": "2885", "第一金": "2892", "合庫金": "5880", "華南金": "2880", "台新金": "2887",
             "永豐金": "2890", "開發金": "2883", "新光金": "2888", "國票金": "2889", "彰銀": "2801",
             "臺企銀": "2834", "遠東銀": "2845", "聯邦銀": "2838", "台中銀": "2812", "京城銀": "2809",
-
-            // 傳產 / 塑化 / 鋼鐵 / 水泥 / 環保
             "台塑": "1301", "南亞": "1303", "台化": "1326", "台塑化": "6505",
             "中鋼": "2002", "中鴻": "2014", "大成鋼": "2027", "台泥": "1101", "亞泥": "1102",
             "統一": "1216", "遠東新": "1402", "儒鴻": "1476", "聚陽": "1477", "豐泰": "9910", "寶成": "9904",
             "富喬": "1815", "可寧衛": "8422",
-            
-            // 航運
             "長榮": "2603", "陽明": "2609", "萬海": "2615",
             "長榮航": "2618", "華航": "2610", "裕民": "2606", "慧洋": "2637", "新興": "2605",
             "漢翔": "2634", "台灣高鐵": "2633",
-
-            // 汽車 / 電機 / 重電
             "和泰車": "2207", "裕隆": "2201", "中華": "2204", "三陽工業": "2206",
             "華城": "1519", "士電": "1503", "中興電": "1513", "亞力": "1514", "東元": "1504",
-            
-            // 通信 / 通路
             "中華電": "2412", "台灣大": "3045", "遠傳": "4904",
             "統一超": "2912", "全家": "5903", "聯強": "2347", "大聯大": "3702", "文曄": "3036",
-
-            // 熱門 ETF (市值型/高股息/債券)
             "0050": "0050", "元大台灣50": "0050",
             "0056": "0056", "元大高股息": "0056",
             "006208": "006208", "富邦台50": "006208",
@@ -379,6 +342,69 @@
                     return validData;
                 } else { return null; }
             } catch (error) { return null; }
+        }
+
+        // --- NEW: K-Line Pattern Detection ---
+        function detectPattern(data) {
+            if (data.length < 3) return { name: "資料不足", signal: "neutral", desc: "數據不足" };
+            
+            const cur = data[data.length - 1];
+            const prev = data[data.length - 2];
+            const prev2 = data[data.length - 3];
+
+            const isGreen = c => c.close > c.open; // In Taiwan, Red is up, Green is down. Code logic: Green is down (close < open in my logic? Wait. Taiwan: Up=Red. Down=Green. 
+            // Let's standardize: Up = close > open (Red), Down = close < open (Green/Black).
+            // Helper: isUp
+            const isUp = c => c.close > c.open;
+            
+            const body = c => Math.abs(c.close - c.open);
+            const upper = c => c.high - Math.max(c.open, c.close);
+            const lower = c => Math.min(c.open, c.close) - c.low;
+            const avgBody = (body(cur) + body(prev) + body(prev2)) / 3;
+
+            // 1. Engulfing
+            // Bullish: Prev Down, Cur Up, Cur wraps Prev
+            if (!isUp(prev) && isUp(cur) && cur.close > prev.open && cur.open < prev.close) {
+                return { name: "多頭吞噬", signal: "bull", desc: "陽線實體包覆前日陰線，多方強勢反撲。" };
+            }
+            // Bearish: Prev Up, Cur Down, Cur wraps Prev
+            if (isUp(prev) && !isUp(cur) && cur.close < prev.open && cur.open > prev.close) {
+                return { name: "空頭吞噬", signal: "bear", desc: "陰線實體包覆前日陽線，空方賣壓沈重。" };
+            }
+
+            // 2. Hammer / Hanging Man (Simplification)
+            if (lower(cur) > 2 * body(cur) && upper(cur) < body(cur)) {
+                return { name: "錘頭/吊人", signal: "neutral", desc: "下影線長，顯示低檔有撐或需觀察隔日確認。" };
+            }
+
+            // 3. Shooting Star
+            if (upper(cur) > 2 * body(cur) && lower(cur) < body(cur)) {
+                return { name: "流星/倒錘", signal: "bear", desc: "上影線長，上檔壓力重。" };
+            }
+
+            // 4. Doji
+            if (body(cur) < avgBody * 0.1) {
+                return { name: "十字線", signal: "neutral", desc: "多空力道均衡，變盤訊號。" };
+            }
+
+            // 5. Three White Soldiers
+            if (isUp(cur) && isUp(prev) && isUp(prev2) && cur.close > prev.close && prev.close > prev2.close) {
+                return { name: "紅三兵", signal: "bull", desc: "連續三根陽線創新高，多頭氣勢強。" };
+            }
+
+            // 6. Three Black Crows
+            if (!isUp(cur) && !isUp(prev) && !isUp(prev2) && cur.close < prev.close && prev.close < prev2.close) {
+                return { name: "黑三鴉", signal: "bear", desc: "連續三根陰線創新低，空頭賣壓重。" };
+            }
+
+            // Default
+            if (isUp(cur)) {
+                if (body(cur) > avgBody * 1.5) return { name: "長紅K", signal: "bull", desc: "實體長紅，買盤強勁。" };
+                return { name: "小紅K", signal: "neutral", desc: "多方小幅佔優。" };
+            } else {
+                if (body(cur) > avgBody * 1.5) return { name: "長黑K", signal: "bear", desc: "實體長黑，賣壓湧現。" };
+                return { name: "小黑K", signal: "neutral", desc: "空方小幅佔優。" };
+            }
         }
 
         function calculateIndicators(data) {
@@ -519,19 +545,15 @@
 
         // --- History Logic ---
         function addToHistory(symbol, name) {
-            // Remove existing if present to move to front
             searchHistory = searchHistory.filter(item => item.symbol !== symbol);
-            // Add to front
             searchHistory.unshift({ symbol, name });
-            // Limit to 10
             if (searchHistory.length > 10) searchHistory.pop();
-            // Save
             localStorage.setItem('stockHistory_v1', JSON.stringify(searchHistory));
             renderHistory();
         }
 
         function removeFromHistory(e, symbol) {
-            e.stopPropagation(); // Prevent triggering loadStock
+            e.stopPropagation(); 
             searchHistory = searchHistory.filter(item => item.symbol !== symbol);
             localStorage.setItem('stockHistory_v1', JSON.stringify(searchHistory));
             renderHistory();
@@ -584,7 +606,6 @@
                     }
                 }
             } else {
-                // Input is code, try to find name
                 const foundName = Object.keys(stockNameMap).find(key => stockNameMap[key] === input && !/[0-9]/.test(key));
                 stockName = foundName || "台股";
             }
@@ -607,7 +628,6 @@
                 return;
             }
 
-            // Success - Add to history
             addToHistory(ticker, stockName);
 
             document.getElementById('display-name').innerText = `${ticker} ${stockName}`;
@@ -725,6 +745,9 @@
             const bbUp = maps.bbUp.get(time) || 0;
             const bbLow = maps.bbLow.get(time) || 0;
 
+            // Pattern Detection
+            const pattern = detectPattern(data);
+
             // Trend Score
             let trendScore = 0;
             let maText = "";
@@ -734,6 +757,10 @@
             else if (last.close > ma) { maText = "多方整理"; maClass = "border-bull"; trendScore += 1; }
             else if (ma5 < ma && last.close < ma5) { maText = "空方主導"; maClass = "border-bear"; trendScore -= 2; }
             else { maText = "空方抵抗"; maClass = "border-bear"; trendScore -= 1; }
+
+            // Adjust score with pattern
+            if (pattern.signal === 'bull') trendScore += 0.5;
+            if (pattern.signal === 'bear') trendScore -= 0.5;
 
             let rsiText = rsi.toFixed(1);
             let rsiClass = "border-bull";
@@ -770,7 +797,6 @@
                 </div>
             `;
 
-            // Fix: Add back synthesis logic
             let summaryTitle = "";
             let summaryColor = "";
             let summaryContent = "";
@@ -827,6 +853,11 @@
                 signalText = `<span class="${colorClass}">${daysAgo}天前 ${action}</span>`;
             }
 
+            // Pattern Box Color
+            let patClass = 'pattern-neu';
+            if (pattern.signal === 'bull') patClass = 'pattern-bull';
+            if (pattern.signal === 'bear') patClass = 'pattern-bear';
+
             const support = trendScore > 0 ? ma : bbLow;
             const pressure = trendScore < 0 ? ma : bbUp;
             const entryPrice = trendScore > 0 ? ma : bbLow; 
@@ -852,12 +883,25 @@
                 
                 <div class="report-grid">
                     <div class="report-section">
+                        <div class="section-title">🔮 K線型態預測 (實驗性)</div>
+                        <div class="pattern-box ${patClass}">
+                            <strong>${pattern.name}</strong><br>${pattern.desc}
+                        </div>
+                    </div>
+                    <div class="report-section">
                         <div class="section-title">📊 趨勢結構</div>
                         <div class="report-text">${trendDetail} ${bbDetail}</div>
                     </div>
                     <div class="report-section">
                         <div class="section-title">🌊 動能與籌碼</div>
                         <div class="report-text">MACD ${macdText} RSI ${rsi.toFixed(1)}。<br>最近訊號：${signalText}。<br>${volDetail}</div>
+                    </div>
+                    <div class="report-section">
+                        <div class="section-title">🎯 關鍵點位</div>
+                        <div class="report-text">
+                            壓力：<span class="p-tag-sell">${pressure.toFixed(0)}</span> <br>
+                            支撐：<span class="p-tag-buy">${support.toFixed(0)}</span>
+                        </div>
                     </div>
                     <div class="report-item report-item-full">
                         <div class="action-box">
@@ -892,9 +936,7 @@
             });
         };
 
-        // Init
         renderHistory();
-        // Load default if history exists, otherwise 2330
         if(searchHistory.length > 0) {
             loadStockFromHistory(searchHistory[0].symbol);
         } else {
