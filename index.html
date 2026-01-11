@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>台股智慧分析 App - v9.7 (Colorful Tooltip)</title>
+<title>台股智慧分析 App - v9.9 (Synthesis Strategy)</title>
 <script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
 <style>
     /* Reset & Base */
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body { background: #0e1015; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #d1d4dc; height: 100vh; display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; }
+    body { background: #0e1015; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #d1d4dc; min-height: 100vh; display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; }
     
     /* --- 1. Header Toolbar --- */
     .toolbar {
@@ -78,28 +78,40 @@
     .rec-sell { background: linear-gradient(135deg, #fdd835 0%, #fbc02d 100%); color: #000 !important; }
     .rec-hold { background: linear-gradient(135deg, #787b86 0%, #4a4a4a 100%); }
 
-    /* --- 3. Analysis Report --- */
+    /* --- 3. Analysis Report (Fix: Expanded, No Scroll) --- */
     .analysis-report {
-        background: #131722; padding: 16px 24px; border-bottom: 1px solid #000;
-        display: none; flex-direction: column; gap: 12px; flex-shrink: 0;
-        max-height: 280px; overflow-y: auto; -webkit-overflow-scrolling: touch;
+        background: #131722; padding: 20px 24px; border-bottom: 1px solid #000;
+        display: none; flex-direction: column; gap: 16px; flex-shrink: 0;
     }
-    .report-header { font-size: 15px; font-weight: bold; color: #40c4ff; display: flex; align-items: center; gap: 6px; margin-bottom: 6px; border-bottom: 1px solid #2a2e39; padding-bottom: 8px; }
-    .report-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .report-section { background: #1e222d; padding: 12px; border-radius: 8px; border: 1px solid #2a2e39; display: flex; flex-direction: column; gap: 4px; }
-    .section-title { font-size: 12px; color: #40c4ff; font-weight: bold; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
-    .report-text { font-size: 13px; color: #b2b5be; line-height: 1.6; word-break: break-word; }
+    .report-header { font-size: 16px; font-weight: bold; color: #40c4ff; display: flex; align-items: center; gap: 8px; margin-bottom: 8px; border-bottom: 2px solid #2a2e39; padding-bottom: 10px; }
+    
+    /* New Synthesis Section Style */
+    .synthesis-section {
+        background: linear-gradient(to right, #1e222d, #161920);
+        padding: 16px; border-radius: 8px; border-left: 5px solid #787b86;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3); margin-bottom: 4px;
+    }
+    .synthesis-title { font-size: 15px; font-weight: bold; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    .synthesis-content { font-size: 14px; color: #d1d4dc; line-height: 1.6; }
+    .syn-bull { border-left-color: #e91e63; }
+    .syn-bear { border-left-color: #ffeb3b; }
+    .syn-neu { border-left-color: #d1d4dc; }
+
+    .report-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .report-section { background: #1e222d; padding: 16px; border-radius: 8px; border: 1px solid #2a2e39; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
+    .section-title { font-size: 13px; color: #40c4ff; font-weight: bold; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; letter-spacing: 0.5px; }
+    .report-text { font-size: 14px; color: #b2b5be; line-height: 1.6; word-break: break-word; }
     .highlight-bull { color: #e91e63; font-weight: bold; }
     .highlight-bear { color: #ffeb3b; font-weight: bold; }
     .highlight-neutral { color: #d1d4dc; font-weight: bold; }
     .report-item-full { grid-column: 1 / -1; }
     
-    .action-box { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 5px; }
-    .action-card { background: #262a35; padding: 12px; border-radius: 8px; border-top: 4px solid #787b86; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+    .action-box { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 5px; }
+    .action-card { background: #262a35; padding: 16px; border-radius: 8px; border-top: 4px solid #787b86; box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
     .action-card.held { border-top-color: #29b6f6; }
     .action-card.empty { border-top-color: #ab47bc; }
-    .action-title { font-size: 13px; font-weight: bold; color: #fff; margin-bottom: 8px; }
-    .action-content { font-size: 13px; color: #d1d4dc; line-height: 1.5; }
+    .action-title { font-size: 14px; font-weight: bold; color: #fff; margin-bottom: 8px; }
+    .action-content { font-size: 14px; color: #d1d4dc; line-height: 1.6; }
     
     .p-tag-buy { background: #e91e63; color: #fff; padding: 1px 5px; border-radius: 4px; font-weight: bold; font-family: 'Monaco', monospace; }
     .p-tag-sell { background: #ffeb3b; color: #000; padding: 1px 5px; border-radius: 4px; font-weight: bold; font-family: 'Monaco', monospace; }
@@ -114,7 +126,7 @@
     #macd { flex: 4; min-height: 50px; }
     #rsi { flex: 3; min-height: 40px; }
 
-    /* New: Floating Tooltip (The moving box) */
+    /* Floating Tooltip */
     .floating-tooltip {
         position: absolute;
         width: 160px;
@@ -136,7 +148,7 @@
     .ft-value { color: #d1d4dc; font-weight: bold; }
     .ft-header { color: #40c4ff; border-bottom: 1px solid #2a2e39; padding-bottom: 4px; margin-bottom: 6px; font-weight: bold; font-size: 12px; }
 
-    /* Static Legend (For Indicators) */
+    /* Static Legend */
     .chart-legend {
         position: absolute; top: 0; left: 0; right: 0; z-index: 50;
         padding: 6px 12px; pointer-events: none; display: flex; flex-wrap: wrap; gap: 12px;
@@ -145,7 +157,7 @@
     .legend-item { display: flex; gap: 4px; align-items: center; }
     .legend-val { font-weight: bold; color: #d1d4dc; font-family: 'Monaco', monospace; }
     .c-ma5 { color: #40c4ff; } .c-ma20 { color: #FFD700; } .c-bb { color: #2962ff; } 
-    .c-up { color: #e91e63; } .c-down { color: #ffeb3b; } /* Colors match */
+    .c-up { color: #e91e63; } .c-down { color: #ffeb3b; } 
 
     .indicator-legend-sub { position: absolute; top: 4px; left: 10px; z-index: 10; font-size: 11px; font-family: monospace; color: #787b86; pointer-events: none; }
     
@@ -165,6 +177,7 @@
         #vol { flex: 1; }
         .report-grid { grid-template-columns: 1fr; }
         .action-box { grid-template-columns: 1fr; }
+        .analysis-report { padding: 12px; }
     }
     @media (min-width: 601px) and (max-width: 1024px) {
         .report-grid { grid-template-columns: 1fr 1fr; }
@@ -199,11 +212,10 @@
     <div class="analysis-report" id="analysis-report"></div>
 
     <div class="container">
-        <!-- New: Floating Tooltip Element inside Container -->
+        <!-- Floating Tooltip -->
         <div id="floating-tooltip" class="floating-tooltip"></div>
 
         <div id="main" class="chart-box">
-            <!-- Static Legend for Indicators only -->
             <div class="chart-legend" id="main-legend">
                 <span class="legend-item"><span class="c-ma5">MA5:</span> <span class="legend-val c-ma5" id="l-ma5">--</span></span>
                 <span class="legend-item"><span class="c-ma20">MA20:</span> <span class="legend-val c-ma20" id="l-ma20">--</span></span>
@@ -447,11 +459,8 @@
             setZoom(180);
         }
 
-        // --- New Floating Tooltip Logic ---
         function updateTooltip(param) {
             const tooltip = document.getElementById('floating-tooltip');
-            
-            // 1. Hide if mouse out
             if (!param.point || !param.time || !maps.data) {
                 tooltip.style.display = 'none';
                 return;
@@ -460,27 +469,21 @@
             const d = maps.data.get(param.time);
             if (!d) return;
 
-            // 2. Show & Position
             tooltip.style.display = 'block';
             const container = document.querySelector('.container');
             const box = container.getBoundingClientRect();
             
-            // Position relative to the container
             let left = param.point.x + 20; 
             let top = param.point.y + 20;
-
-            // Boundary check (keep inside main chart area approximately)
             if (left > box.width - 180) left = param.point.x - 180;
-            if (top > 400) top = 400; // Limit vertical
+            if (top > 400) top = 400; 
 
             tooltip.style.left = left + 'px';
             tooltip.style.top = top + 'px';
 
-            // 3. Content
             const idx = currentRawData.findIndex(r => r.time === param.time);
             let change = 0, changeP = 0;
-            // Define colors
-            let closeColor = '#ffeb3b'; // Default yellow for flat
+            let closeColor = '#ffeb3b'; 
             let sign = '';
 
             if (idx > 0) {
@@ -489,12 +492,11 @@
                 changeP = (change / prev.close) * 100;
                 
                 if (change > 0) {
-                    closeColor = '#ef5350'; // Red
+                    closeColor = '#ef5350'; 
                     sign = '+';
                 } else if (change < 0) {
-                    closeColor = '#26a69a'; // Green
+                    closeColor = '#26a69a'; 
                 }
-                // else remain yellow
             }
 
             tooltip.innerHTML = `
@@ -507,7 +509,6 @@
                 <div class="ft-row"><span class="ft-label">成交</span> <span class="ft-value">${(d.vol/1000).toFixed(0)}K</span></div>
             `;
 
-            // Update Legend (Indicators)
             const fmt = v => v ? v.toFixed(2) : '--';
             document.getElementById('l-ma5').innerText = fmt(maps.ma5.get(param.time));
             document.getElementById('l-ma20').innerText = fmt(maps.ma.get(param.time));
@@ -528,37 +529,22 @@
         function generateStrategy(data, inds) {
             if (!data || data.length === 0) return;
             const last = data[data.length-1];
-            const time = last.time;
             
-            const ma = maps.ma.get(time) || 0;
-            const ma5 = maps.ma5.get(time) || 0;
-            const rsi = maps.rsi.get(time) || 50;
-            const osc = maps.hist.get(time) || 0;
-            const bbUp = maps.bbUp.get(time) || 0;
-            const bbLow = maps.bbLow.get(time) || 0;
+            const ma = maps.ma.get(last.time) || 0;
+            const ma5 = maps.ma5.get(last.time) || 0;
+            const rsi = maps.rsi.get(last.time) || 50;
+            const osc = maps.hist.get(last.time) || 0;
+            const bbUp = maps.bbUp.get(last.time) || 0;
+            const bbLow = maps.bbLow.get(last.time) || 0;
 
-            // Trend Score
             let trendScore = 0;
             let maText = "";
             let maClass = "";
             
-            if (ma5 > ma && last.close > ma5) {
-                maText = "多頭強勢";
-                maClass = "border-bull";
-                trendScore += 2;
-            } else if (last.close > ma) {
-                maText = "多方整理";
-                maClass = "border-bull";
-                trendScore += 1;
-            } else if (ma5 < ma && last.close < ma5) {
-                maText = "空方主導";
-                maClass = "border-bear";
-                trendScore -= 2;
-            } else {
-                maText = "空方抵抗";
-                maClass = "border-bear";
-                trendScore -= 1;
-            }
+            if (ma5 > ma && last.close > ma5) { maText = "多頭強勢"; maClass = "border-bull"; trendScore += 2; }
+            else if (last.close > ma) { maText = "多方整理"; maClass = "border-bull"; trendScore += 1; }
+            else if (ma5 < ma && last.close < ma5) { maText = "空方主導"; maClass = "border-bear"; trendScore -= 2; }
+            else { maText = "空方抵抗"; maClass = "border-bear"; trendScore -= 1; }
 
             let rsiText = rsi.toFixed(1);
             let rsiClass = "border-bull";
@@ -573,6 +559,7 @@
             if (trendScore >= 1.5) { recText = "強力買進"; recClass = "rec-buy"; }
             else if (trendScore <= -1.5) { recText = "偏空操作"; recClass = "rec-sell"; }
 
+            // 1. Dashboard
             document.getElementById('dashboard').innerHTML = `
                 <div class="strategy-card ${maClass}">
                     <div class="card-title">趨勢 (MA)</div>
@@ -595,25 +582,51 @@
                 </div>
             `;
 
+            // 2. Comprehensive Synthesis
+            let summaryTitle = "";
+            let summaryColor = "";
+            let summaryContent = "";
+
+            // Calculate metrics for summary
+            const bandwidth = ((bbUp - bbLow) / ma * 100).toFixed(1); 
             let volSum = 0; const volLookback = 5;
             for(let i=0; i<volLookback; i++) if(data.length > i) volSum += data[data.length-1-i].vol;
             const avgVol = volSum / volLookback;
             const volRatio = last.vol / avgVol;
 
+            if (trendScore >= 1.5) {
+                summaryTitle = "🚀 強勢多頭格局";
+                summaryColor = "syn-bull";
+                summaryContent = `目前股價站穩月線及五日線之上，且 MA5 與 MA20 呈黃金交叉，趨勢顯著偏多。配合 MACD 紅柱與 RSI ${rsi.toFixed(0)} 強勢區表現，建議順勢操作。${volRatio > 1.2 ? "量能同步放大，攻擊力道強勁。" : "量能穩健，籌碼安定。"}`;
+            } else if (trendScore >= 0.5) {
+                summaryTitle = "📈 震盪偏多整理";
+                summaryColor = "syn-bull";
+                summaryContent = `股價雖位於月線之上，但短線動能稍弱（${last.close < ma5 ? "跌破五日線" : "漲勢趨緩"}）。長線保護短線，回測支撐不破為佈局良機。需觀察 MACD 是否轉強。`;
+            } else if (trendScore <= -1.5) {
+                summaryTitle = "📉 空方慣性下跌";
+                summaryColor = "syn-bear";
+                summaryContent = `股價遭月線與五日線雙重反壓，MA 呈死亡交叉，空方氣勢強盛。MACD 綠柱持續，RSI ${rsi.toFixed(0)} 弱勢，反彈皆視為逃命波，切勿盲目摸底。`;
+            } else if (trendScore <= -0.5) {
+                summaryTitle = "📉 弱勢反彈格局";
+                summaryColor = "syn-bear";
+                summaryContent = `股價雖嘗試反彈，但受制於下彎的月線壓力。除非帶量長紅突破月線，否則仍屬空方中繼整理。建議逢高減碼，保留現金。`;
+            } else {
+                summaryTitle = "⚖️ 多空膠著盤整";
+                summaryColor = "syn-neu";
+                summaryContent = `均線糾結且布林通道壓縮（頻寬 ${bandwidth}%），市場缺乏明確方向。MACD 柱狀體收斂，多空力道均衡。建議縮手觀望，等待突破區間（${bbUp.toFixed(0)} ~ ${bbLow.toFixed(0)}）再行介入。`;
+            }
+
+            // 3. Detail Report
             const bias = ((last.close - ma) / ma * 100).toFixed(2);
             let trendDetail = "";
             if (ma5 > ma) {
-                trendDetail = `短均線(MA5)位於月線(MA20)之上，呈現黃金交叉多頭排列。股價與月線乖離率 <span class="highlight-neutral">${bias}%</span>。`;
-                if(last.close < ma5) trendDetail += " 唯股價跌破五日線，短線有獲利回吐壓力。";
-                else trendDetail += " 股價沿五日線強勢上攻。";
+                trendDetail = `短均線(MA5)位於月線(MA20)之上，呈多頭排列。股價與月線乖離 <span class="highlight-neutral">${bias}%</span>。${last.close < ma5 ? "跌破五日線，短線有獲利回吐壓力。" : "股價沿五日線強勢上攻。"}`;
             } else {
-                trendDetail = `短均線(MA5)位於月線(MA20)之下，呈現死亡交叉空方排列。股價與月線乖離率 <span class="highlight-neutral">${bias}%</span>。`;
-                if(last.close > ma5) trendDetail += " 股價站上五日線，試圖築底反彈。";
+                trendDetail = `短均線(MA5)位於月線(MA20)之下，呈空方排列。股價與月線乖離 <span class="highlight-neutral">${bias}%</span>。${last.close > ma5 ? "股價站上五日線，試圖築底。" : "股價受五日線壓制。"}`;
             }
 
-            const bandwidth = ((bbUp - bbLow) / ma * 100).toFixed(1); 
             let bbDetail = `通道寬度 ${bandwidth}%，`;
-            if (parseFloat(bandwidth) < 5.0) bbDetail += `呈現壓縮狀態，波動率極低，<span class="highlight-bull">變盤在即</span>。`;
+            if (parseFloat(bandwidth) < 5.0) bbDetail += `呈現壓縮狀態，<span class="highlight-bull">變盤在即</span>。`;
             else bbDetail += `波動率正常。`;
             
             let volDetail = "";
@@ -621,51 +634,56 @@
             else if (volRatio < 0.6) volDetail = `量能<span class="highlight-neutral">急縮</span> (均量 ${(avgVol/1000).toFixed(0)}K)，觀望氣氛濃。`;
             else volDetail = "量能溫和。";
 
+            // Signal Text
+            let signalText = "無訊號";
+            if (lastSignal) {
+                const daysAgo = Math.floor((new Date(last.time) - new Date(lastSignal.time)) / (1000 * 60 * 60 * 24));
+                const action = lastSignal.type === 'BUY' ? '金叉買進' : '死叉賣出';
+                const colorClass = lastSignal.type === 'BUY' ? 'highlight-bull' : 'highlight-bear';
+                signalText = `<span class="${colorClass}">${daysAgo}天前 ${action}</span>`;
+            }
+
+            // Advice
             const support = trendScore > 0 ? ma : bbLow;
             const pressure = trendScore < 0 ? ma : bbUp;
+            const entryPrice = trendScore > 0 ? ma : bbLow; 
 
             let adviceHeld = "", adviceEmpty = "";
             if (trendScore >= 1) { 
-                adviceHeld = `多頭續抱。防守點設於月線 <span class="p-tag-sell">${support.toFixed(0)}</span>。`;
-                adviceEmpty = `拉回五日線 <span class="p-tag-buy">${ma5.toFixed(0)}</span> 不破可佈局，目標上軌 <span class="p-tag-buy">${bbUp.toFixed(0)}</span>。`;
+                adviceHeld = `續抱。防守點月線 <span class="p-tag-sell">${support.toFixed(0)}</span>。`;
+                adviceEmpty = `拉回五日線 <span class="p-tag-buy">${ma5.toFixed(0)}</span> 可佈局，目標 <span class="p-tag-buy">${bbUp.toFixed(0)}</span>。`;
             } else if (trendScore <= -1) {
-                adviceHeld = `反彈至月線 <span class="p-tag-sell">${pressure.toFixed(0)}</span> 減碼。跌破下軌 <span class="p-tag-sell">${bbLow.toFixed(0)}</span> 則需嚴格停損。`;
-                adviceEmpty = `空方趨勢，建議觀望。等待站回月線再考慮進場。`;
+                adviceHeld = `反彈月線 <span class="p-tag-sell">${pressure.toFixed(0)}</span> 減碼。破下軌 <span class="p-tag-sell">${bbLow.toFixed(0)}</span> 停損。`;
+                adviceEmpty = `空方趨勢，建議觀望。等待站回月線。`;
             } else {
                 adviceHeld = `區間操作，上軌 <span class="p-tag-sell">${bbUp.toFixed(0)}</span> 獲利，下軌 <span class="p-tag-buy">${bbLow.toFixed(0)}</span> 回補。`;
-                adviceEmpty = `箱型震盪，下軌 <span class="p-tag-buy">${bbLow.toFixed(0)}</span> 附近嘗試短多，跌破則停損。`;
+                adviceEmpty = `箱型震盪，下軌 <span class="p-tag-buy">${bbLow.toFixed(0)}</span> 嘗試短多。`;
             }
 
             const reportHTML = `
-                <div class="report-header">🛡️ AI 全方位深度診斷</div>
+                <div class="report-header">🛡️ AI 綜合策略研判</div>
+                <div class="synthesis-section ${summaryColor}">
+                    <div class="synthesis-title">${summaryTitle}</div>
+                    <div class="synthesis-content">${summaryContent}</div>
+                </div>
+                
                 <div class="report-grid">
                     <div class="report-section">
                         <div class="section-title">📊 趨勢結構</div>
-                        <div class="report-text">${trendDetail}</div>
+                        <div class="report-text">${trendDetail} ${bbDetail}</div>
                     </div>
                     <div class="report-section">
-                        <div class="section-title">🌊 動能訊號</div>
-                        <div class="report-text">${bbDetail} RSI ${rsi.toFixed(1)}，${macdText}。</div>
-                    </div>
-                    <div class="report-section">
-                        <div class="section-title">💸 量價分析</div>
-                        <div class="report-text">${volDetail}</div>
-                    </div>
-                    <div class="report-section">
-                        <div class="section-title">🎯 關鍵點位</div>
-                        <div class="report-text">
-                            壓力：<span class="p-tag-sell">${pressure.toFixed(0)}</span> <br>
-                            支撐：<span class="p-tag-buy">${support.toFixed(0)}</span>
-                        </div>
+                        <div class="section-title">🌊 動能與籌碼</div>
+                        <div class="report-text">MACD ${macdText} RSI ${rsi.toFixed(1)}。<br>最近訊號：${signalText}。<br>${volDetail}</div>
                     </div>
                     <div class="report-item report-item-full">
                         <div class="action-box">
                             <div class="action-card held">
-                                <div class="action-title"><span>🙋‍♂️ 已持有者 (Held)</span></div>
+                                <div class="action-title"><span>🙋‍♂️ 已持有建議</span></div>
                                 <div class="action-content">${adviceHeld}</div>
                             </div>
                             <div class="action-card empty">
-                                <div class="action-title"><span>🤷‍♂️ 未持有者 (Not Held)</span></div>
+                                <div class="action-title"><span>🤷‍♂️ 未持有建議</span></div>
                                 <div class="action-content">${adviceEmpty}</div>
                             </div>
                         </div>
