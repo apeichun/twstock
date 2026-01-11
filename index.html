@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>台股智慧分析 App - v9.2 (Highlight Signals)</title>
+<title>台股智慧分析 App - v9.3 (Pro Report)</title>
 <script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
 <style>
     /* Reset & Base */
@@ -111,9 +111,8 @@
     .card-title { font-size: 11px; color: #9aa0b0; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
     .card-value { font-size: 15px; font-weight: bold; color: #e0e0e0; white-space: nowrap; }
     
-    /* Updated Signal Colors */
-    .border-bull { border-left-color: #e91e63 !important; } /* Pink */
-    .border-bear { border-left-color: #ffeb3b !important; } /* Yellow */
+    .border-bull { border-left-color: #e91e63 !important; }
+    .border-bear { border-left-color: #ffeb3b !important; }
     
     .recommendation-badge {
         padding: 10px 20px;
@@ -127,12 +126,11 @@
         white-space: nowrap;
         flex-shrink: 0;
     }
-    /* Updated Badge Gradients */
     .rec-buy { background: linear-gradient(135deg, #e91e63 0%, #ad1457 100%); }
     .rec-sell { background: linear-gradient(135deg, #fdd835 0%, #fbc02d 100%); color: #000 !important; }
     .rec-hold { background: linear-gradient(135deg, #787b86 0%, #4a4a4a 100%); }
 
-    /* --- 3. Analysis Report --- */
+    /* --- 3. Analysis Report (Enhanced Layout) --- */
     .analysis-report {
         background: #131722;
         padding: 16px 24px;
@@ -141,66 +139,52 @@
         flex-direction: column;
         gap: 12px;
         flex-shrink: 0;
-        max-height: 280px;
+        max-height: 400px; /* Allow more height for details */
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
     }
-    .report-header { font-size: 15px; font-weight: bold; color: #2962ff; display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
-    .report-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .report-item { font-size: 13px; color: #b2b5be; line-height: 1.6; background: #1e222d; padding: 12px; border-radius: 8px; border: 1px solid #2a2e39; word-break: break-word; }
-    .report-item strong { color: #e0e0e0; display: block; margin-bottom: 6px; font-size: 12px; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px; }
+    .report-header { font-size: 15px; font-weight: bold; color: #40c4ff; display: flex; align-items: center; gap: 6px; margin-bottom: 6px; border-bottom: 1px solid #2a2e39; padding-bottom: 8px; }
     
-    /* Highlight Colors Text */
+    .report-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    
+    .report-section {
+        background: #1e222d; padding: 12px; border-radius: 8px; border: 1px solid #2a2e39;
+        display: flex; flex-direction: column; gap: 4px;
+    }
+    .section-title { font-size: 12px; color: #40c4ff; font-weight: bold; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
+    
+    .report-text { font-size: 13px; color: #b2b5be; line-height: 1.6; word-break: break-word; }
+    
     .highlight-bull { color: #e91e63; font-weight: bold; }
     .highlight-bear { color: #ffeb3b; font-weight: bold; }
     .highlight-neutral { color: #d1d4dc; font-weight: bold; }
+    
     .report-item-full { grid-column: 1 / -1; }
     
     .action-box { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 5px; }
-    .action-card { background: #2a2e39; padding: 12px; border-radius: 8px; border-top: 4px solid #787b86; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+    .action-card { background: #262a35; padding: 12px; border-radius: 8px; border-top: 4px solid #787b86; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
     .action-card.held { border-top-color: #29b6f6; }
     .action-card.empty { border-top-color: #ab47bc; }
     .action-title { font-size: 13px; font-weight: bold; color: #fff; margin-bottom: 8px; }
     .action-content { font-size: 13px; color: #d1d4dc; line-height: 1.5; }
     
-    /* Updated Price Tags */
-    .p-tag-buy { 
-        background: #e91e63; color: #fff; padding: 2px 6px; border-radius: 4px; font-weight: bold; 
-        font-family: 'Monaco', monospace; box-shadow: 0 2px 4px rgba(233, 30, 99, 0.3);
-    }
-    .p-tag-sell { 
-        background: #ffeb3b; color: #000; padding: 2px 6px; border-radius: 4px; font-weight: bold; 
-        font-family: 'Monaco', monospace; box-shadow: 0 2px 4px rgba(255, 235, 59, 0.3);
-    }
-    .p-tag-neu {
-        background: #ffb74d; color: #000; padding: 2px 6px; border-radius: 4px; font-weight: bold;
-        font-family: 'Monaco', monospace;
-    }
+    /* Price Tags */
+    .p-tag-buy { background: #e91e63; color: #fff; padding: 1px 5px; border-radius: 4px; font-weight: bold; font-family: 'Monaco', monospace; }
+    .p-tag-sell { background: #ffeb3b; color: #000; padding: 1px 5px; border-radius: 4px; font-weight: bold; font-family: 'Monaco', monospace; }
+    .p-tag-neu { background: #ffb74d; color: #000; padding: 1px 5px; border-radius: 4px; font-weight: bold; font-family: 'Monaco', monospace; }
 
-    /* --- 4. Chart Layout (Card Style) --- */
+    /* --- 4. Chart Layout --- */
     .container { 
-        flex: 1; 
-        display: flex; 
-        flex-direction: column; 
-        /* Adjusted padding to minimize whitespace */
-        padding: 10px 24px 20px 24px; 
-        gap: 8px; 
-        overflow: hidden; 
-        background: transparent; 
+        flex: 1; display: flex; flex-direction: column; 
+        padding: 20px 30px 50px 30px; gap: 8px; overflow: hidden; background: transparent; 
     }
     
     .chart-box { 
-        position: relative; 
-        width: 100%; 
-        background: #131722; 
-        overflow: hidden; 
-        border-radius: 12px; 
-        border: 1px solid #2a2e39;
-        box-shadow: 0 8px 16px rgba(0,0,0,0.3); 
+        position: relative; width: 100%; background: #131722; overflow: hidden; 
+        border-radius: 12px; border: 1px solid #2a2e39; box-shadow: 0 8px 16px rgba(0,0,0,0.3); 
     }
     
-    /* Fix: Increased flex ratio for Main Chart */
-    #main { flex: 20; min-height: 300px; } /* Give main chart significantly more space */
+    #main { flex: 20; min-height: 300px; } 
     #vol { flex: 3; min-height: 40px; }
     #macd { flex: 4; min-height: 50px; }
     #rsi { flex: 3; min-height: 40px; }
@@ -215,10 +199,10 @@
     .info-group { display: flex; gap: 6px; align-items: center; white-space: nowrap; }
     .info-value { font-weight: bold; color: #d1d4dc; font-family: 'Monaco', monospace; }
     
-    /* Updated Legend Colors */
-    .c-ma { color: #FFD700; } .c-bb { color: #2962ff; } 
-    .c-up { color: #e91e63; } /* Pink */
-    .c-down { color: #ffeb3b; } /* Yellow */
+    .c-ma5 { color: #40c4ff; }
+    .c-ma20 { color: #FFD700; } 
+    .c-bb { color: #2962ff; } 
+    .c-up { color: #e91e63; } .c-down { color: #ffeb3b; }
     
     .indicator-legend-sub {
         position: absolute; top: 6px; left: 10px; z-index: 10;
@@ -233,7 +217,6 @@
     }
 
     /* --- 5. RWD Media Queries --- */
-    
     @media (max-width: 600px) {
         .container { padding: 8px 10px 16px 10px; gap: 6px; }
         .toolbar { gap: 10px; padding: 10px; }
@@ -249,11 +232,6 @@
         .action-box { grid-template-columns: 1fr; }
         .chart-info-bar { font-size: 12px; padding: 6px 10px; gap: 8px; }
         .info-group { gap: 3px; }
-    }
-
-    @media (min-width: 601px) and (max-width: 1024px) {
-        .report-grid { grid-template-columns: 1fr 1fr; }
-        #macd, #rsi { flex: 1.5; }
     }
 </style>
 </head>
@@ -308,7 +286,7 @@
         let isUpdatingData = false;
         let lastSignal = null; 
 
-        // --- 1. FinMind Fetcher (Fix: Sort & Filter) ---
+        // --- 1. FinMind Fetcher ---
         function getStartDate() {
             const d = new Date();
             d.setFullYear(d.getFullYear() - 1); 
@@ -322,7 +300,6 @@
                 const response = await fetch(url);
                 const json = await response.json();
                 if (json.msg === 'success' && json.data.length > 0) {
-                    // Fix: Filter invalid data & Sort by date ascending
                     const validData = json.data
                         .filter(item => item.close > 0 && item.Trading_Volume > 0)
                         .sort((a, b) => new Date(a.date) - new Date(b.date))
@@ -339,13 +316,20 @@
             } catch (error) { return null; }
         }
 
-        // --- 2. Indicators ---
+        // --- 2. Indicators (Updated: Added MA5) ---
         function calculateIndicators(data) {
             const closes = data.map(d => d.close);
-            const maData = [];
+            const maData = []; // MA20
+            const ma5Data = []; // MA5
             const bbUp = [], bbLow = [];
             
             for (let i = 0; i < data.length; i++) {
+                // MA5
+                if (i >= 4) {
+                    const sum5 = closes.slice(i-4, i+1).reduce((a,b)=>a+b,0);
+                    ma5Data.push({ time: data[i].time, value: sum5/5 });
+                }
+                // MA20 & BB
                 if (i >= 19) {
                     const slice = closes.slice(i-19, i+1);
                     const mean = slice.reduce((a,b)=>a+b,0)/20;
@@ -386,30 +370,24 @@
                 signal = macd*k9 + signal*(1-k9);
                 macdLine.push({ time: data[i].time, value: macd });
                 signalLine.push({ time: data[i].time, value: signal });
-                macdHist.push({ time: data[i].time, value: macd - signal, color: (macd-signal)>=0?'#e91e63':'#26a69a' }); /* Updated MACD Colors */
+                macdHist.push({ time: data[i].time, value: macd - signal, color: (macd-signal)>=0?'#e91e63':'#26a69a' });
             }
 
-            return { ma: maData, bbUp, bbLow, rsi: rsiData, macd: { line: macdLine, signal: signalLine, hist: macdHist } };
+            return { ma: maData, ma5: ma5Data, bbUp, bbLow, rsi: rsiData, macd: { line: macdLine, signal: signalLine, hist: macdHist } };
         }
 
         function generateMarkers(data, inds) {
             const markers = [];
             const hist = inds.macd.hist;
             lastSignal = null; 
-            // Fix: Check indices bounds to prevent errors
             for (let i = 26; i < data.length; i++) {
                 const time = data[i].time;
-                // find corresponding indicator values. Note: arrays might not be perfectly aligned by index 0 due to different start times
-                // Simplification: We assume filtered data is continuous enough.
                 const currHistItem = hist.find(h => h.time === time);
                 const prevHistItem = hist.find(h => h.time === data[i-1].time);
-                
                 if (!currHistItem || !prevHistItem) continue;
-
                 const prevHist = prevHistItem.value;
                 const currHist = currHistItem.value;
                 
-                // Updated Signal Colors
                 if (prevHist < 0 && currHist > 0) {
                     markers.push({ time: time, position: 'belowBar', color: '#e91e63', shape: 'arrowUp', text: '買' });
                     lastSignal = { type: 'BUY', time: time, price: data[i].close };
@@ -437,13 +415,16 @@
         };
 
         let mainChart, volChart, macdChart, rsiChart;
-        let candleSeries, maSeries, upperSeries, lowerSeries, volSeries, macdLineSeries, signalLineSeries, macdHistSeries, rsiSeries;
+        let candleSeries, maSeries, ma5Series, upperSeries, lowerSeries, volSeries, macdLineSeries, signalLineSeries, macdHistSeries, rsiSeries;
         
         function initCharts() {
             mainChart = LightweightCharts.createChart(dom.main, commonOptions);
-            // Updated Candle Colors
             candleSeries = mainChart.addCandlestickSeries({ upColor: '#e91e63', downColor: '#26a69a', borderVisible: false, wickUpColor: '#e91e63', wickDownColor: '#26a69a' });
+            
+            // Added MA5 Series
+            ma5Series = mainChart.addLineSeries({ color: '#40c4ff', lineWidth: 1, crosshairMarkerVisible: false });
             maSeries = mainChart.addLineSeries({ color: '#FFD700', lineWidth: 1, crosshairMarkerVisible: false });
+            
             upperSeries = mainChart.addLineSeries({ color: '#2962ff', lineWidth: 2, crosshairMarkerVisible: false });
             lowerSeries = mainChart.addLineSeries({ color: '#2962ff', lineWidth: 2, crosshairMarkerVisible: false });
 
@@ -510,6 +491,7 @@
             candleSeries.setData(data);
             candleSeries.setMarkers(markers);
             maSeries.setData(inds.ma);
+            ma5Series.setData(inds.ma5); // Set MA5 Data
             upperSeries.setData(inds.bbUp);
             lowerSeries.setData(inds.bbLow);
             volSeries.setData(data.map(r => ({ time: r.time, value: r.vol, color: r.close >= r.open ? 'rgba(239, 83, 80, 0.5)' : 'rgba(38, 166, 154, 0.5)' })));
@@ -521,6 +503,7 @@
             maps = {
                 data: new Map(data.map(r => [r.time, r])),
                 ma: new Map(inds.ma.map(r => [r.time, r.value])),
+                ma5: new Map(inds.ma5.map(r => [r.time, r.value])),
                 bbUp: new Map(inds.bbUp.map(r => [r.time, r.value])),
                 bbLow: new Map(inds.bbLow.map(r => [r.time, r.value])),
                 rsi: new Map(inds.rsi.map(r => [r.time, r.value])),
@@ -554,6 +537,7 @@
             
             // Format values
             const maVal = (maps.ma.get(time) || 0).toFixed(2);
+            const ma5Val = (maps.ma5.get(time) || 0).toFixed(2);
             const bbUpVal = (maps.bbUp.get(time) || 0).toFixed(2);
             const bbLowVal = (maps.bbLow.get(time) || 0).toFixed(2);
 
@@ -564,8 +548,8 @@
                 <span class="info-group">L:<span class="info-value">${d.low}</span></span>
                 <span class="info-group">C:<span class="info-value ${colorClass}">${d.close}</span></span>
                 <span class="info-group ${colorClass}">${sign}${change.toFixed(1)} (${sign}${changeP.toFixed(2)}%)</span>
-                <span class="info-group" style="margin-left:10px;"><span class="c-ma">MA20:</span> <span class="info-value c-ma">${maVal}</span></span>
-                <span class="info-group"><span class="c-bb">BB:</span> <span class="info-value c-bb">${bbUpVal} / ${bbLowVal}</span></span>
+                <span class="info-group" style="margin-left:10px;"><span class="c-ma5">MA5:</span> <span class="info-value c-ma5">${ma5Val}</span></span>
+                <span class="info-group"><span class="c-ma20">MA20:</span> <span class="info-value c-ma20">${maVal}</span></span>
             `;
 
             // Sub-chart legends
@@ -577,7 +561,6 @@
             const osc = maps.hist.get(time);
             const elOsc = document.getElementById('val-osc');
             elOsc.innerText = fmt(osc);
-            // Updated MACD Osc Color
             elOsc.style.color = osc >= 0 ? '#e91e63' : '#26a69a';
             document.getElementById('val-rsi').innerText = fmt(maps.rsi.get(time));
         }
@@ -587,22 +570,41 @@
             else if (currentRawData.length > 0) updateTooltip(currentRawData[currentRawData.length-1].time);
         });
 
-        // --- AI Strategy Logic ---
+        // --- AI Strategy Logic (Enhanced) ---
         function generateStrategy(data, inds) {
             if (!data || data.length === 0) return;
             const last = data[data.length-1];
             const time = last.time;
             
             const ma = maps.ma.get(time) || 0;
+            const ma5 = maps.ma5.get(time) || 0;
             const rsi = maps.rsi.get(time) || 50;
             const osc = maps.hist.get(time) || 0;
             const bbUp = maps.bbUp.get(time) || 0;
             const bbLow = maps.bbLow.get(time) || 0;
 
+            // Trend Score
             let trendScore = 0;
-            let maText = last.close > ma ? "多頭排列" : "空方壓制";
-            let maClass = last.close > ma ? "border-bull" : "border-bear";
-            if(last.close > ma) trendScore++; else trendScore--;
+            let maText = "";
+            let maClass = "";
+            
+            if (ma5 > ma && last.close > ma5) {
+                maText = "多頭強勢";
+                maClass = "border-bull";
+                trendScore += 2;
+            } else if (last.close > ma) {
+                maText = "多方整理";
+                maClass = "border-bull";
+                trendScore += 1;
+            } else if (ma5 < ma && last.close < ma5) {
+                maText = "空方主導";
+                maClass = "border-bear";
+                trendScore -= 2;
+            } else {
+                maText = "空方抵抗";
+                maClass = "border-bear";
+                trendScore -= 1;
+            }
 
             let rsiText = rsi.toFixed(1);
             let rsiClass = "border-bull";
@@ -617,9 +619,10 @@
             if (trendScore >= 1.5) { recText = "強力買進"; recClass = "rec-buy"; }
             else if (trendScore <= -1.5) { recText = "偏空操作"; recClass = "rec-sell"; }
 
+            // 1. Dashboard
             document.getElementById('dashboard').innerHTML = `
                 <div class="strategy-card ${maClass}">
-                    <div class="card-title">趨勢 (MA20)</div>
+                    <div class="card-title">趨勢 (MA)</div>
                     <div class="card-value">${maText}</div>
                 </div>
                 <div class="strategy-card ${macdClass}">
@@ -631,93 +634,84 @@
                     <div class="card-value">${rsiText}</div>
                 </div>
                 <div class="strategy-card">
-                    <div class="card-title">支撐 / 壓力</div>
-                    <div class="card-value">${bbLow.toFixed(0)} / ${bbUp.toFixed(0)}</div>
+                    <div class="card-title">壓力 / 支撐</div>
+                    <div class="card-value">${bbUp.toFixed(0)} / ${bbLow.toFixed(0)}</div>
                 </div>
                 <div class="recommendation-badge ${recClass}">
                     AI 建議：${recText}
                 </div>
             `;
 
-            // Report Details
-            let volSum = 0;
-            const volLookback = 5;
-            for(let i=0; i<volLookback; i++) {
-                if(data.length > i) volSum += data[data.length-1-i].vol;
-            }
+            // 2. Enhanced Report
+            
+            // Vol
+            let volSum = 0; const volLookback = 5;
+            for(let i=0; i<volLookback; i++) if(data.length > i) volSum += data[data.length-1-i].vol;
             const avgVol = volSum / volLookback;
             const volRatio = last.vol / avgVol;
 
+            // Trend Details
+            const bias = ((last.close - ma) / ma * 100).toFixed(2);
             let trendDetail = "";
-            if (last.close > ma) {
-                const dist = ((last.close - ma) / ma * 100).toFixed(1);
-                trendDetail = `股價位於月線 ${ma.toFixed(0)} 之上 (${dist}%)，顯示短期趨勢偏多。`;
+            if (ma5 > ma) {
+                trendDetail = `短均線(MA5)位於月線(MA20)之上，呈現黃金交叉多頭排列。股價與月線乖離率 <span class="highlight-neutral">${bias}%</span>。`;
+                if(last.close < ma5) trendDetail += " 唯股價跌破五日線，短線有獲利回吐壓力。";
+                else trendDetail += " 股價沿五日線強勢上攻。";
             } else {
-                const dist = ((ma - last.close) / ma * 100).toFixed(1);
-                trendDetail = `股價位於月線 ${ma.toFixed(0)} 之下 (${dist}%)，短期趨勢偏弱。`;
+                trendDetail = `短均線(MA5)位於月線(MA20)之下，呈現死亡交叉空方排列。股價與月線乖離率 <span class="highlight-neutral">${bias}%</span>。`;
+                if(last.close > ma5) trendDetail += " 股價站上五日線，試圖築底反彈。";
             }
 
-            let bbDetail = "";
+            // Bollinger & Vol
             const bandwidth = ((bbUp - bbLow) / ma * 100).toFixed(1); 
-            if (last.close > bbUp) {
-                bbDetail = `股價突破上軌，短線動能極強，留意乖離拉回。`;
-            } else if (last.close < bbLow) {
-                bbDetail = `股價跌破下軌，空方動能強烈，但可能有技術性反彈。`;
-            } else {
-                if (parseFloat(bandwidth) < 5.0) {
-                     bbDetail = `布林通道收縮中 (寬度 ${bandwidth}%)，變盤在即。`;
-                } else {
-                    bbDetail = `股價在通道區間內震盪 (上${bbUp.toFixed(0)}/下${bbLow.toFixed(0)})。`;
-                }
-            }
-
-            let macdDetail = "";
-            if (osc > 0) {
-                macdDetail = "MACD 柱狀體為紅色 (多方)。";
-            } else {
-                macdDetail = "MACD 柱狀體為綠色 (空方)。";
-            }
+            let bbDetail = `通道寬度 ${bandwidth}%，`;
+            if (parseFloat(bandwidth) < 5.0) bbDetail += `呈現壓縮狀態，波動率極低，<span class="highlight-bull">變盤在即</span>。`;
+            else bbDetail += `波動率正常。`;
             
-            let signalText = "近期無明確轉折訊號。";
-            if (lastSignal) {
-                const daysAgo = Math.floor((new Date(time) - new Date(lastSignal.time)) / (1000 * 60 * 60 * 24));
-                const action = lastSignal.type === 'BUY' ? '黃金交叉 (買進)' : '死亡交叉 (賣出)';
-                const colorClass = lastSignal.type === 'BUY' ? 'highlight-bull' : 'highlight-bear';
-                signalText = `最近訊號：<span class="${colorClass}">${daysAgo}天前 ${action}</span>`;
-            }
-
             let volDetail = "";
-            if (volRatio > 1.5) {
-                volDetail = `今日爆量 (均量 ${(avgVol/1000).toFixed(0)}K)。`;
-            } else if (volRatio < 0.6) {
-                volDetail = `今日量縮 (均量 ${(avgVol/1000).toFixed(0)}K)。`;
-            } else {
-                volDetail = "成交量正常。";
-            }
+            if (volRatio > 1.5) volDetail = `量能<span class="highlight-bull">放大</span> (均量 ${(avgVol/1000).toFixed(0)}K)，攻擊動能強。`;
+            else if (volRatio < 0.6) volDetail = `量能<span class="highlight-neutral">急縮</span> (均量 ${(avgVol/1000).toFixed(0)}K)，觀望氣氛濃。`;
+            else volDetail = "量能溫和。";
 
-            let adviceHeld = "";
-            let adviceEmpty = "";
-            const stopLoss = trendScore > 0 ? ma : bbLow;
-            const takeProfit = bbUp;
-            const entryPrice = trendScore > 0 ? ma : bbLow; 
+            // Support/Resistance
+            const support = trendScore > 0 ? ma : bbLow;
+            const pressure = trendScore < 0 ? ma : bbUp;
 
-            // Fix: Use new p-tag classes for highlights
+            // Advice
+            let adviceHeld = "", adviceEmpty = "";
             if (trendScore >= 1) { 
-                adviceHeld = `趨勢多頭，建議<span class="highlight-bull">續抱</span>。移動停損設於月線 <span class="p-tag-sell">${stopLoss.toFixed(0)}</span>，若爆量跌破則獲利了結。目標價看上軌 <span class="p-tag-buy">${takeProfit.toFixed(0)}</span>。`;
-                adviceEmpty = `多頭格局，不宜追高。建議等待拉回至月線 <span class="p-tag-buy">${entryPrice.toFixed(0)}</span> 附近量縮止穩後佈局。`;
+                adviceHeld = `多頭續抱。防守點設於月線 <span class="p-tag-sell">${support.toFixed(0)}</span>。`;
+                adviceEmpty = `拉回五日線 <span class="p-tag-buy">${ma5.toFixed(0)}</span> 不破可佈局，目標上軌 <span class="p-tag-buy">${bbUp.toFixed(0)}</span>。`;
             } else if (trendScore <= -1) {
-                adviceHeld = `趨勢空頭，建議反彈至月線 <span class="p-tag-sell">${ma.toFixed(0)}</span> 附近<span class="highlight-bear">減碼或出場</span>。若跌破下軌 <span class="p-tag-sell">${bbLow.toFixed(0)}</span> 則需嚴格停損。`;
-                adviceEmpty = `空方勢弱，建議<span class="highlight-neutral">觀望</span>。若欲搶反彈，需待股價站回月線或出現底部訊號，勿輕易摸底。`;
+                adviceHeld = `反彈至月線 <span class="p-tag-sell">${pressure.toFixed(0)}</span> 減碼。跌破下軌 <span class="p-tag-sell">${bbLow.toFixed(0)}</span> 停損。`;
+                adviceEmpty = `空方趨勢，建議觀望。等待站回月線再考慮進場。`;
             } else {
-                adviceHeld = `區間震盪，建議<span class="highlight-neutral">區間操作</span>。接近上軌 <span class="p-tag-sell">${takeProfit.toFixed(0)}</span> 減碼，接近下軌 <span class="p-tag-buy">${bbLow.toFixed(0)}</span> 可回補。`;
-                adviceEmpty = `箱型整理，可於下軌 <span class="p-tag-buy">${bbLow.toFixed(0)}</span> 附近嘗試短多，跌破則停損。`;
+                adviceHeld = `區間操作，上軌 <span class="p-tag-sell">${bbUp.toFixed(0)}</span> 獲利，下軌 <span class="p-tag-buy">${bbLow.toFixed(0)}</span> 回補。`;
+                adviceEmpty = `箱型震盪，下軌 <span class="p-tag-buy">${bbLow.toFixed(0)}</span> 附近嘗試短多。`;
             }
 
             const reportHTML = `
-                <div class="report-header">🛡️ AI 深度分析報告</div>
+                <div class="report-header">🛡️ AI 全方位深度診斷</div>
                 <div class="report-grid">
-                    <div class="report-item"><strong>【趨勢分析】</strong><br>${trendDetail} ${bbDetail}</div>
-                    <div class="report-item"><strong>【動能訊號】</strong><br>${macdDetail} ${signalText} ${volDetail}</div>
+                    <div class="report-section">
+                        <div class="section-title">📊 趨勢結構</div>
+                        <div class="report-text">${trendDetail}</div>
+                    </div>
+                    <div class="report-section">
+                        <div class="section-title">🌊 動能訊號</div>
+                        <div class="report-text">${bbDetail} RSI ${rsi.toFixed(1)}，${macdText}。</div>
+                    </div>
+                    <div class="report-section">
+                        <div class="section-title">💸 量價分析</div>
+                        <div class="report-text">${volDetail}</div>
+                    </div>
+                    <div class="report-section">
+                        <div class="section-title">🎯 關鍵點位</div>
+                        <div class="report-text">
+                            壓力：<span class="p-tag-sell">${pressure.toFixed(0)}</span> <br>
+                            支撐：<span class="p-tag-buy">${support.toFixed(0)}</span>
+                        </div>
+                    </div>
                     <div class="report-item report-item-full">
                         <div class="action-box">
                             <div class="action-card held">
