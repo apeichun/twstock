@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>台股智慧分析 App - v9.9 (Synthesis Strategy)</title>
+<title>台股智慧分析 App - v10.5 (History)</title>
 <script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
 <style>
     /* Reset & Base */
@@ -53,6 +53,46 @@
     .zoom-btn:hover { background: #2a2e39; color: #fff; }
     .zoom-btn.active { background: #2962ff; color: white; border-color: #2962ff; box-shadow: 0 0 8px rgba(41, 98, 255, 0.4); }
 
+    /* --- NEW: History Bar --- */
+    .history-bar {
+        background: #181b21;
+        padding: 8px 24px;
+        border-bottom: 1px solid #000;
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        white-space: nowrap;
+        scrollbar-width: none; /* Firefox */
+        align-items: center;
+        flex-shrink: 0;
+    }
+    .history-bar::-webkit-scrollbar { display: none; }
+    
+    .history-label { font-size: 11px; color: #787b86; margin-right: 4px; font-weight: bold; text-transform: uppercase; }
+    
+    .history-chip {
+        background: #2a2e39;
+        color: #b2b5be;
+        border: 1px solid #363a45;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .history-chip:hover { background: #363a45; color: #fff; border-color: #40c4ff; }
+    .history-chip.active { background: #2962ff; color: white; border-color: #2962ff; }
+    
+    .history-remove {
+        width: 14px; height: 14px; display: flex; align-items: center; justify-content: center;
+        border-radius: 50%; background: rgba(0,0,0,0.2); font-size: 9px; line-height: 1;
+        opacity: 0.6; transition: opacity 0.2s;
+    }
+    .history-remove:hover { opacity: 1; background: #ff5252; color: white; }
+
     /* --- 2. Strategy Dashboard --- */
     .strategy-dashboard {
         background: #181c27; padding: 12px 24px; border-bottom: 1px solid #000;
@@ -78,20 +118,19 @@
     .rec-sell { background: linear-gradient(135deg, #fdd835 0%, #fbc02d 100%); color: #000 !important; }
     .rec-hold { background: linear-gradient(135deg, #787b86 0%, #4a4a4a 100%); }
 
-    /* --- 3. Analysis Report (Fix: Expanded, No Scroll) --- */
+    /* --- 3. Analysis Report --- */
     .analysis-report {
         background: #131722; padding: 20px 24px; border-bottom: 1px solid #000;
         display: none; flex-direction: column; gap: 16px; flex-shrink: 0;
     }
     .report-header { font-size: 16px; font-weight: bold; color: #40c4ff; display: flex; align-items: center; gap: 8px; margin-bottom: 8px; border-bottom: 2px solid #2a2e39; padding-bottom: 10px; }
     
-    /* New Synthesis Section Style */
     .synthesis-section {
         background: linear-gradient(to right, #1e222d, #161920);
         padding: 16px; border-radius: 8px; border-left: 5px solid #787b86;
         box-shadow: 0 4px 10px rgba(0,0,0,0.3); margin-bottom: 4px;
     }
-    .synthesis-title { font-size: 15px; font-weight: bold; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    .synthesis-title { font-size: 15px; font-weight: bold; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; color: #fff; }
     .synthesis-content { font-size: 14px; color: #d1d4dc; line-height: 1.6; }
     .syn-bull { border-left-color: #e91e63; }
     .syn-bear { border-left-color: #ffeb3b; }
@@ -172,6 +211,7 @@
         .search-group { max-width: 100%; margin-right: 0; }
         .zoom-group { width: 100%; justify-content: flex-end; margin-top: 6px; border-top: 1px solid #2a2e39; padding-top: 6px; }
         .zoom-btn { flex: 1; text-align: center; }
+        .history-bar { padding: 6px 10px; }
         #macd, #rsi { display: none; } 
         #main { flex: 4; } 
         #vol { flex: 1; }
@@ -197,7 +237,7 @@
         </div>
         
         <div class="search-group">
-            <input type="text" id="stock-input" class="search-input" placeholder="代號" value="2330" onkeydown="if(event.key==='Enter') loadStock()">
+            <input type="text" id="stock-input" class="search-input" placeholder="代號/名稱" value="2330" onkeydown="if(event.key==='Enter') loadStock()">
             <button class="search-btn" id="btn-go" onclick="loadStock()">Go</button>
         </div>
 
@@ -206,6 +246,12 @@
             <button class="zoom-btn active" onclick="setZoom(180)">6M</button>
             <button class="zoom-btn" onclick="setZoom(365)">1Y</button>
         </div>
+    </div>
+    
+    <!-- History Bar -->
+    <div class="history-bar" id="history-bar">
+        <span class="history-label">最近搜尋:</span>
+        <!-- History items will be injected here -->
     </div>
     
     <div class="strategy-dashboard" id="dashboard"></div>
@@ -235,6 +281,69 @@
         let maps = {}; 
         let isUpdatingData = false;
         let lastSignal = null; 
+        
+        // History State
+        let searchHistory = JSON.parse(localStorage.getItem('stockHistory_v1')) || [];
+
+        // 股票名稱對照表 (v10.4)
+        const stockNameMap = {
+            // 半導體 / 電子
+            "台積電": "2330", "聯電": "2303", "力積電": "6770", "世界": "5347", "聯發科": "2454",
+            "鴻海": "2317", "台達電": "2308", "日月光": "3711", "聯詠": "3034", "瑞昱": "2379",
+            "創意": "3443", "世芯": "3661", "力旺": "3529", "信驊": "5274", "祥碩": "5269",
+            "南亞科": "2408", "華邦電": "2344", "旺宏": "2337", "群聯": "8299", "威剛": "3260",
+            
+            // AI / 電腦 / 網通 / 組裝
+            "廣達": "2382", "緯創": "3231", "技嘉": "2376", "微星": "2377", "華碩": "2357",
+            "宏碁": "2353", "英業達": "2356", "仁寶": "2324", "光寶科": "2301", "緯穎": "6669",
+            "智邦": "2345", "台光電": "2383", "金像電": "2368", "健鼎": "3044", "欣興": "3037",
+            "南電": "8046", "景碩": "3189", "臻鼎": "4958", "台燿": "6274", "台表科": "6278",
+            "奇鋐": "3017", "雙鴻": "3324", "建準": "2421", "和碩": "4938",
+            
+            // 光電 / 面板 / 被動元件
+            "大立光": "3008", "玉晶光": "3406", "友達": "2409", "群創": "3481", "彩晶": "6116",
+            "國巨": "2327", "華新科": "2492", "臺慶科": "3357", "大毅": "2478", "中光電": "5371",
+            
+            // 金融
+            "富邦金": "2881", "國泰金": "2882", "中信金": "2891", "兆豐金": "2886", "玉山金": "2884",
+            "元大金": "2885", "第一金": "2892", "合庫金": "5880", "華南金": "2880", "台新金": "2887",
+            "永豐金": "2890", "開發金": "2883", "新光金": "2888", "國票金": "2889", "彰銀": "2801",
+            "臺企銀": "2834", "遠東銀": "2845", "聯邦銀": "2838", "台中銀": "2812", "京城銀": "2809",
+
+            // 傳產 / 塑化 / 鋼鐵 / 水泥 / 環保
+            "台塑": "1301", "南亞": "1303", "台化": "1326", "台塑化": "6505",
+            "中鋼": "2002", "中鴻": "2014", "大成鋼": "2027", "台泥": "1101", "亞泥": "1102",
+            "統一": "1216", "遠東新": "1402", "儒鴻": "1476", "聚陽": "1477", "豐泰": "9910", "寶成": "9904",
+            "富喬": "1815", "可寧衛": "8422",
+            
+            // 航運
+            "長榮": "2603", "陽明": "2609", "萬海": "2615",
+            "長榮航": "2618", "華航": "2610", "裕民": "2606", "慧洋": "2637", "新興": "2605",
+            "漢翔": "2634", "台灣高鐵": "2633",
+
+            // 汽車 / 電機 / 重電
+            "和泰車": "2207", "裕隆": "2201", "中華": "2204", "三陽工業": "2206",
+            "華城": "1519", "士電": "1503", "中興電": "1513", "亞力": "1514", "東元": "1504",
+            
+            // 通信 / 通路
+            "中華電": "2412", "台灣大": "3045", "遠傳": "4904",
+            "統一超": "2912", "全家": "5903", "聯強": "2347", "大聯大": "3702", "文曄": "3036",
+
+            // 熱門 ETF (市值型/高股息/債券)
+            "0050": "0050", "元大台灣50": "0050",
+            "0056": "0056", "元大高股息": "0056",
+            "006208": "006208", "富邦台50": "006208",
+            "00878": "00878", "國泰永續高股息": "00878",
+            "00929": "00929", "復華台灣科技優息": "00929",
+            "00919": "00919", "群益台灣精選高息": "00919",
+            "00940": "00940", "元大台灣價值高息": "00940",
+            "00939": "00939", "統一台灣高息動能": "00939",
+            "00713": "00713", "元大台灣高息低波": "00713",
+            "00631L": "00631L", "元大台灣50正2": "00631L",
+            "00632R": "00632R", "元大台灣50反1": "00632R",
+            "00679B": "00679B", "元大美債20年": "00679B",
+            "00687B": "00687B", "國泰20年美債": "00687B"
+        };
 
         function getStartDate() {
             const d = new Date();
@@ -401,29 +510,100 @@
         }
         initCharts();
 
+        // --- History Logic ---
+        function addToHistory(symbol, name) {
+            // Remove existing if present to move to front
+            searchHistory = searchHistory.filter(item => item.symbol !== symbol);
+            // Add to front
+            searchHistory.unshift({ symbol, name });
+            // Limit to 10
+            if (searchHistory.length > 10) searchHistory.pop();
+            // Save
+            localStorage.setItem('stockHistory_v1', JSON.stringify(searchHistory));
+            renderHistory();
+        }
+
+        function removeFromHistory(e, symbol) {
+            e.stopPropagation(); // Prevent triggering loadStock
+            searchHistory = searchHistory.filter(item => item.symbol !== symbol);
+            localStorage.setItem('stockHistory_v1', JSON.stringify(searchHistory));
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('history-bar');
+            if (searchHistory.length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+            container.style.display = 'flex';
+            
+            let html = '<span class="history-label">最近搜尋:</span>';
+            searchHistory.forEach(item => {
+                html += `
+                    <div class="history-chip ${item.symbol === document.getElementById('stock-input').value ? 'active' : ''}" onclick="loadStockFromHistory('${item.symbol}')">
+                        ${item.name} ${item.symbol}
+                        <div class="history-remove" onclick="removeFromHistory(event, '${item.symbol}')">×</div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function loadStockFromHistory(symbol) {
+            document.getElementById('stock-input').value = symbol;
+            loadStock();
+        }
+
         async function loadStock() {
             const input = document.getElementById('stock-input').value.trim();
             if (!input) return;
 
+            let ticker = input;
+            let stockName = "";
+            
+            if (/[^0-9]/.test(input)) {
+                if (stockNameMap[input]) {
+                    ticker = stockNameMap[input];
+                    stockName = input;
+                } else {
+                    const foundName = Object.keys(stockNameMap).find(name => name.includes(input));
+                    if (foundName) {
+                        ticker = stockNameMap[foundName];
+                        stockName = foundName;
+                    } else {
+                        alert(`找不到 "${input}" 的代號。\n請嘗試輸入完整名稱或直接輸入代號 (如 2330)。`);
+                        return;
+                    }
+                }
+            } else {
+                // Input is code, try to find name
+                const foundName = Object.keys(stockNameMap).find(key => stockNameMap[key] === input && !/[0-9]/.test(key));
+                stockName = foundName || "台股";
+            }
+
             document.getElementById('loading').style.display = 'flex';
             document.getElementById('btn-go').disabled = true;
-            document.getElementById('display-name').innerText = `Loading ${input}...`;
+            document.getElementById('display-name').innerText = `Loading ${ticker}...`;
             document.getElementById('analysis-report').style.display = 'none';
             
             isUpdatingData = true;
-            const data = await fetchFinMindData(input);
+            const data = await fetchFinMindData(ticker);
             document.getElementById('loading').style.display = 'none';
             document.getElementById('btn-go').disabled = false;
 
             if (!data) {
                 isUpdatingData = false;
-                document.getElementById('display-name').innerText = `${input} 查無資料`;
+                document.getElementById('display-name').innerText = `${ticker} 查無資料`;
                 document.getElementById('status-text').innerHTML = `<div class="dot-error"></div> Data Error`;
                 alert("無法抓取該代號數據，請確認代號正確。");
                 return;
             }
 
-            document.getElementById('display-name').innerText = `${input} TW`;
+            // Success - Add to history
+            addToHistory(ticker, stockName);
+
+            document.getElementById('display-name').innerText = `${ticker} ${stockName}`;
             document.getElementById('status-text').innerHTML = `<div class="dot-live"></div> FinMind Connected`;
             currentRawData = data;
 
@@ -529,14 +709,16 @@
         function generateStrategy(data, inds) {
             if (!data || data.length === 0) return;
             const last = data[data.length-1];
+            const time = last.time;
             
-            const ma = maps.ma.get(last.time) || 0;
-            const ma5 = maps.ma5.get(last.time) || 0;
-            const rsi = maps.rsi.get(last.time) || 50;
-            const osc = maps.hist.get(last.time) || 0;
-            const bbUp = maps.bbUp.get(last.time) || 0;
-            const bbLow = maps.bbLow.get(last.time) || 0;
+            const ma = maps.ma.get(time) || 0;
+            const ma5 = maps.ma5.get(time) || 0;
+            const rsi = maps.rsi.get(time) || 50;
+            const osc = maps.hist.get(time) || 0;
+            const bbUp = maps.bbUp.get(time) || 0;
+            const bbLow = maps.bbLow.get(time) || 0;
 
+            // Trend Score
             let trendScore = 0;
             let maText = "";
             let maClass = "";
@@ -559,7 +741,6 @@
             if (trendScore >= 1.5) { recText = "強力買進"; recClass = "rec-buy"; }
             else if (trendScore <= -1.5) { recText = "偏空操作"; recClass = "rec-sell"; }
 
-            // 1. Dashboard
             document.getElementById('dashboard').innerHTML = `
                 <div class="strategy-card ${maClass}">
                     <div class="card-title">趨勢 (MA)</div>
@@ -582,12 +763,10 @@
                 </div>
             `;
 
-            // 2. Comprehensive Synthesis
+            // Fix: Add back synthesis logic
             let summaryTitle = "";
             let summaryColor = "";
             let summaryContent = "";
-
-            // Calculate metrics for summary
             const bandwidth = ((bbUp - bbLow) / ma * 100).toFixed(1); 
             let volSum = 0; const volLookback = 5;
             for(let i=0; i<volLookback; i++) if(data.length > i) volSum += data[data.length-1-i].vol;
@@ -616,7 +795,6 @@
                 summaryContent = `均線糾結且布林通道壓縮（頻寬 ${bandwidth}%），市場缺乏明確方向。MACD 柱狀體收斂，多空力道均衡。建議縮手觀望，等待突破區間（${bbUp.toFixed(0)} ~ ${bbLow.toFixed(0)}）再行介入。`;
             }
 
-            // 3. Detail Report
             const bias = ((last.close - ma) / ma * 100).toFixed(2);
             let trendDetail = "";
             if (ma5 > ma) {
@@ -634,7 +812,6 @@
             else if (volRatio < 0.6) volDetail = `量能<span class="highlight-neutral">急縮</span> (均量 ${(avgVol/1000).toFixed(0)}K)，觀望氣氛濃。`;
             else volDetail = "量能溫和。";
 
-            // Signal Text
             let signalText = "無訊號";
             if (lastSignal) {
                 const daysAgo = Math.floor((new Date(last.time) - new Date(lastSignal.time)) / (1000 * 60 * 60 * 24));
@@ -643,7 +820,6 @@
                 signalText = `<span class="${colorClass}">${daysAgo}天前 ${action}</span>`;
             }
 
-            // Advice
             const support = trendScore > 0 ? ma : bbLow;
             const pressure = trendScore < 0 ? ma : bbUp;
             const entryPrice = trendScore > 0 ? ma : bbLow; 
@@ -709,7 +885,14 @@
             });
         };
 
-        loadStock(); 
+        // Init
+        renderHistory();
+        // Load default if history exists, otherwise 2330
+        if(searchHistory.length > 0) {
+            loadStockFromHistory(searchHistory[0].symbol);
+        } else {
+            loadStock();
+        }
         
     </script>
 </body>
