@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>台股智慧分析 App - v10.5 (History)</title>
+<title>台股智慧分析 App - v10.6 (Larger Tooltip)</title>
 <script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
 <style>
     /* Reset & Base */
@@ -165,27 +165,34 @@
     #macd { flex: 4; min-height: 50px; }
     #rsi { flex: 3; min-height: 40px; }
 
-    /* Floating Tooltip */
+    /* Floating Tooltip (Fix: Larger Font) */
     .floating-tooltip {
         position: absolute;
-        width: 160px;
+        width: 200px; /* Wider */
         background-color: rgba(14, 16, 21, 0.95);
         border: 1px solid #2a2e39;
         border-radius: 6px;
-        padding: 8px;
+        padding: 10px; /* More padding */
         z-index: 1000;
         pointer-events: none;
         display: none;
         box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         font-family: 'Monaco', monospace;
-        font-size: 11px;
+        font-size: 14px; /* Larger Font */
         line-height: 1.5;
         backdrop-filter: blur(4px);
     }
-    .ft-row { display: flex; justify-content: space-between; margin-bottom: 2px; }
+    .ft-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
     .ft-label { color: #787b86; }
     .ft-value { color: #d1d4dc; font-weight: bold; }
-    .ft-header { color: #40c4ff; border-bottom: 1px solid #2a2e39; padding-bottom: 4px; margin-bottom: 6px; font-weight: bold; font-size: 12px; }
+    .ft-header { 
+        color: #40c4ff; 
+        border-bottom: 1px solid #2a2e39; 
+        padding-bottom: 6px; 
+        margin-bottom: 8px; 
+        font-weight: bold; 
+        font-size: 15px; /* Larger Header */
+    }
 
     /* Static Legend */
     .chart-legend {
